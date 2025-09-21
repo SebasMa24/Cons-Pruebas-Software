@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title th:text="${titulo}">Gestor de Tareas</title>
+
+  <!-- CDN de Tailwind -->
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-100 text-gray-900">
+
+  <!-- Header básico -->
+  <header class="bg-blue-600 text-white py-4 shadow-md">
+    <h1 class="text-center text-2xl font-bold">Gestor de Tareas</h1>
+  </header>
+
+  <!-- Contenedor principal -->
+  <main class="max-w-3xl mx-auto p-6">
+    <section class="bg-white rounded-lg shadow-md p-6">
+      <h2 class="text-xl font-semibold mb-4">Lista de Tareas</h2>
+
+      <!-- Mensaje si no hay tareas -->
+      <div th:if="${#lists.isEmpty(tareas)}" class="text-center text-gray-500 italic">
+        <p>No hay tareas registradas. ¡Crea una nueva tarea!</p>
+      </div>
+
+      <!-- Listado de tareas en tarjetas -->
+      <div th:if="${!#lists.isEmpty(tareas)}" class="space-y-4">
+        <div th:each="tarea : ${tareas}" class="bg-white shadow-md rounded-lg p-4 border border-gray-200">
+
+          <!-- Título -->
+          <h2 class="text-lg font-semibold text-gray-800 mb-2" th:text="${tarea.titulo}">
+            Título de la tarea
+          </h2>
+
+          <!-- Descripción -->
+          <p class="text-gray-600 text-sm mb-3" th:text="${tarea.descripcion}">
+            Descripción de la tarea
+          </p>
+
+          <!-- Información inferior -->
+          <div class="flex justify-between items-center">
+            <!-- Fecha -->
+            <span class="text-xs text-gray-500" th:text="${#temporals.format(tarea.fechaVencimiento, 'dd/MM/yyyy')}">
+              20/09/2025
+            </span>
+
+            <!-- Estado -->
+            <span class="px-2 py-1 text-xs rounded-full font-medium" th:text="${tarea.estado}"
+              th:classappend="${tarea.estado == 'COMPLETADA'} ? 'bg-green-100 text-green-800' :
+                                  (tarea.estado == 'EN_PROGRESO' ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800')">
+              Estado
+            </span>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-gray-800 text-gray-300 text-center py-4 mt-6">
+    <small>© <span th:text="${#dates.format(#dates.createNow(),'yyyy')}">2025</span> Gestor de Tareas</small>
+  </footer>
+
+</body>
+
+</html>
