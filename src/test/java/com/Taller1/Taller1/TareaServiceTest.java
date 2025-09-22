@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
 import java.util.Arrays;
@@ -16,6 +17,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 class TareaServiceTest {
@@ -26,9 +28,96 @@ class TareaServiceTest {
     @InjectMocks
     private TareaService tareaService;
 
+    private Tarea tarea;
+
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
+        tarea = new Tarea();
+        tarea.setId(1L);
+        tarea.setTitulo("Tarea de prueba");
+        tarea.setDescripcion("Descripción de prueba");
+        tarea.setEstado("PENDIENTE");
+    }
+
+    @Test
+    void crearTarea_conTituloValido_debeGuardarTarea() {
+        when(tareaRepository.save(any(Tarea.class))).thenReturn(tarea);
+
+        Tarea resultado = tareaService.crearTarea(tarea);
+
+        assertNotNull(resultado);
+        assertEquals("Tarea de prueba", resultado.getTitulo());
+        verify(tareaRepository, times(1)).save(tarea);
+    }
+
+    @Test
+    void crearTarea_conTituloVacio_debeLanzarExcepcion() {
+        tarea.setTitulo("");
+
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> {
+            tareaService.crearTarea(tarea);
+        });
+
+        assertEquals("El título de la tarea no puede estar vacío", exception.getReason());
+        verify(tareaRepository, never()).save(any());
+    }
+
+    @Test
+    void crearTarea_conTituloNull_debeLanzarExcepcion() {
+        tarea.setTitulo(null);
+
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> {
+            tareaService.crearTarea(tarea);
+        });
+
+        assertEquals("El título de la tarea no puede estar vacío", exception.getReason());
+    }
+
+    @Test
+    void crearTarea_conTituloMuyLargo_debeLanzarExcepcion() {
+        tarea.setTitulo("A".repeat(101));
+
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> {
+            tareaService.crearTarea(tarea);
+        });
+
+        assertEquals("El título de la tarea no puede exceder 100 caracteres", exception.getReason());
+    }
+
+    @Test
+    void crearTarea_conTituloEnLimite_debeGuardarCorrectamente() {
+        tarea.setTitulo("A".repeat(100));
+        when(tareaRepository.save(any(Tarea.class))).thenReturn(tarea);
+
+        Tarea resultado = tareaService.crearTarea(tarea);
+
+        assertNotNull(resultado);
+        assertEquals(100, resultado.getTitulo().length());
+        verify(tareaRepository, times(1)).save(tarea);
+    }
+
+    @Test
+    void crearTarea_conDescripcionNull_debeGuardarCorrectamente() {
+        tarea.setDescripcion(null);
+        when(tareaRepository.save(any(Tarea.class))).thenReturn(tarea);
+
+        Tarea resultado = tareaService.crearTarea(tarea);
+
+        assertNotNull(resultado);
+        assertNull(resultado.getDescripcion());
+    }
+
+    @Test
+    void crearTarea_conFechaVencimiento_debeGuardarCorrectamente() {
+        LocalDate fecha = LocalDate.now().plusDays(5);
+        tarea.setFechaVencimiento(fecha);
+        when(tareaRepository.save(any(Tarea.class))).thenReturn(tarea);
+
+        Tarea resultado = tareaService.crearTarea(tarea);
+
+        assertNotNull(resultado);
+        assertEquals(fecha, resultado.getFechaVencimiento());
     }
 
     @Test
