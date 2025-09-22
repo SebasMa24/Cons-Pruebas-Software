@@ -20,6 +20,10 @@
 
   <!-- Contenedor principal -->
   <main class="max-w-3xl mx-auto p-6">
+    <!-- Popup de error -->
+    <div id="error-popup" class="hidden fixed top-4 right-4 bg-red-500 text-black px-4 py-2 rounded shadow-lg"></div>
+
+    <!-- Listado de tareas -->
     <section class="bg-white rounded-lg shadow-md p-6">
       <h2 class="text-xl font-semibold mb-4">Lista de Tareas</h2>
 
@@ -66,6 +70,7 @@
     <small>© <span th:text="${#dates.format(#dates.createNow(),'yyyy')}">2025</span> Gestor de Tareas</small>
   </footer>
 
+  <script th:src="@{/script.js}"></script>
 </body>
 
 </html>
