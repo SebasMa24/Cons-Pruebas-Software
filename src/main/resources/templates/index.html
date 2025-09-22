@@ -23,6 +23,30 @@
     <!-- Popup de error -->
     <div id="error-popup" class="hidden fixed top-4 right-4 bg-red-500 text-black px-4 py-2 rounded shadow-lg"></div>
 
+    <!-- Formulario para agregar tarea -->
+    <section class="bg-white rounded-lg shadow-md p-6 mb-6">
+      <h2 class="text-xl font-semibold mb-4">Agregar Nueva Tarea</h2>
+      <form id="form-tarea" th:object="${tareaNueva}" class="space-y-4">
+        <div>
+          <label for="titulo" class="block text-gray-700 font-medium mb-1">Título</label>
+          <input type="text" id="titulo" name="titulo" th:field="*{titulo}" placeholder="Título de la tarea"
+            class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400" required/>
+        </div>
+        <div>
+          <label for="descripcion" class="block text-gray-700 font-medium mb-1">Descripción</label>
+          <textarea id="descripcion" name="descripcion" th:field="*{descripcion}" placeholder="Descripción de la tarea"
+            class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"></textarea>
+        </div>
+        <div>
+          <label for="fechaVencimiento" class="block text-gray-700 font-medium mb-1">Fecha de Vencimiento</label>
+          <input type="date" id="fechaVencimiento" name="fechaVencimiento" th:field="*{fechaVencimiento}"
+            class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400" required/>
+        <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition">
+          Agregar tarea
+        </button>
+      </form>
+    </section>
+    
     <!-- Listado de tareas -->
     <section class="bg-white rounded-lg shadow-md p-6">
       <h2 class="text-xl font-semibold mb-4">Lista de Tareas</h2>

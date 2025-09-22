@@ -5,7 +5,9 @@ import java.time.temporal.IsoFields;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.Taller1.Taller1.Entity.Tarea;
 import com.Taller1.Taller1.Repository.TareaRepository;
@@ -43,5 +45,17 @@ public class TareaService {
                 .filter(t -> t.getFechaVencimiento() != null &&
                         t.getFechaVencimiento().get(IsoFields.WEEK_OF_WEEK_BASED_YEAR) == numeroSemana)
                 .toList();
+    }
+
+    // Crear una nueva tarea
+    public Tarea crearTarea(Tarea tarea) {
+        if (tarea.getTitulo() == null || tarea.getTitulo().isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El título de la tarea no puede estar vacío");
+        }
+        if (tarea.getTitulo().length() > 100) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El título de la tarea no puede exceder 100 caracteres");
+        }
+        tarea.setEstado("PENDIENTE");
+        return tareaRepository.save(tarea);
     }
 }
