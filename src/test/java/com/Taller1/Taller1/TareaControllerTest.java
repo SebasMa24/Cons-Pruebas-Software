@@ -1,22 +1,28 @@
 package com.Taller1.Taller1;
 
-import com.Taller1.Taller1.Controller.TareaController;
-import com.Taller1.Taller1.Entity.Tarea;
-import com.Taller1.Taller1.Service.TareaService;
+import java.time.LocalDate;
+import java.util.List;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import org.mockito.MockitoAnnotations;
 import org.springframework.test.web.servlet.MockMvc;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-import java.time.LocalDate;
-import java.util.List;
-
-import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import com.Taller1.Taller1.Controller.TareaController;
+import com.Taller1.Taller1.Entity.Tarea;
+import com.Taller1.Taller1.Service.TareaService;
 
 class TareaControllerTest {
 
@@ -74,5 +80,31 @@ class TareaControllerTest {
                 .andExpect(model().attribute("tareas", List.of(tarea)));
 
         verify(tareaService, times(1)).filtrarPorSemana(38);
+    }
+
+    @Test
+    void cambiarEstado_debeActualizarYRedirigir() throws Exception {
+        Tarea tarea = new Tarea(1L, "Tarea 1", "Desc", LocalDate.now(), "PENDIENTE");
+        when(tareaService.actualizarEstado(1L, "COMPLETADA")).thenReturn(tarea);
+
+        mockMvc.perform(post("/tareas/1/estado")
+                .param("estado", "COMPLETADA"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/"));
+
+        verify(tareaService).actualizarEstado(1L, "COMPLETADA");
+    }
+
+    @Test
+    void cambiarEstado_aEnProgresoDebeLlamarServicio() throws Exception {
+        Tarea tarea = new Tarea(2L, "Tarea 2", "Desc 2", LocalDate.now(), "PENDIENTE");
+        when(tareaService.actualizarEstado(2L, "EN_PROGRESO")).thenReturn(tarea);
+
+        mockMvc.perform(post("/tareas/2/estado")
+                .param("estado", "EN_PROGRESO"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/"));
+
+        verify(tareaService).actualizarEstado(2L, "EN_PROGRESO");
     }
 }
