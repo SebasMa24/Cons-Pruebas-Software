@@ -34,8 +34,10 @@
 
       <!-- Listado de tareas en tarjetas -->
       <div th:if="${!#lists.isEmpty(tareas)}" class="space-y-4">
-        <div th:each="tarea : ${tareas}" class="bg-white shadow-md rounded-lg p-4 border border-gray-200">
+        <div th:each="tarea : ${tareas}" class="bg-white shadow-md rounded-lg p-4 border border-gray-200"  th:classappend="${tarea.estado == 'COMPLETADA'} ? 'opacity-60 line-through' : ''">
 
+           <!-- Form para cambiar estado -->
+        <form th:action="@{'/tareas/' + ${tarea.id} + '/estado'}" method="post" class="flex justify-between items-center p-4 rounded-lg shadow-sm">
           <!-- Título -->
           <h2 class="text-lg font-semibold text-gray-800 mb-2" th:text="${tarea.titulo}">
             Título de la tarea
@@ -46,19 +48,22 @@
             Descripción de la tarea
           </p>
 
+          <select name="estado" onchange="this.form.submit()" class="px-2 py-1 border rounded text-sm" th:classappend="${tarea.estado == 'COMPLETADA'} ? 'bg-green-100 text-green-800' :
+                                  (${tarea.estado == 'PENDIENTE'} ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800')">
+            <option th:value="'PENDIENTE'" th:selected="${tarea.estado == 'PENDIENTE'}">Pendiente</option>
+            <option th:value="'EN_PROGRESO'" th:selected="${tarea.estado == 'EN_PROGRESO'}">En Progreso</option>
+            <option th:value="'COMPLETADA'" th:selected="${tarea.estado == 'COMPLETADA'}">Completada</option>
+          </select>
+          </form>
           <!-- Información inferior -->
           <div class="flex justify-between items-center">
             <!-- Fecha -->
             <span class="text-xs text-gray-500" th:text="${#temporals.format(tarea.fechaVencimiento, 'dd/MM/yyyy')}">
               20/09/2025
             </span>
-
-            <!-- Estado -->
-            <span class="px-2 py-1 text-xs rounded-full font-medium" th:text="${tarea.estado}"
-              th:classappend="${tarea.estado == 'COMPLETADA'} ? 'bg-green-100 text-green-800' :
-                                  (tarea.estado == 'EN_PROGRESO' ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800')">
-              Estado
-            </span>
+            <span class="text-xs text-gray-400 italic block"
+              th:if="${tarea.fechaFinalizacion != null}"
+              th:text="'Finalizada: ' + ${#temporals.format(tarea.fechaFinalizacion, 'dd/MM/yyyy')}"></span>
           </div>
         </div>
       </div>

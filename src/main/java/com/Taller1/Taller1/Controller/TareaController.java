@@ -5,6 +5,8 @@ import java.util.List;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import com.Taller1.Taller1.Entity.Tarea;
@@ -35,6 +37,13 @@ public class TareaController {
 
         model.addAttribute("tareas", tareas);
         return "index";
+    }
+
+    @PostMapping("/tareas/{id}/estado")
+    public String cambiarEstado(@PathVariable Long id,
+                                @RequestParam String estado) {
+        tareaService.actualizarEstado(id, estado);
+        return "redirect:/"; // redirige a la lista principal
     }
 
     

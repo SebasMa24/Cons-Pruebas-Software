@@ -44,4 +44,20 @@ public class TareaService {
                         t.getFechaVencimiento().get(IsoFields.WEEK_OF_WEEK_BASED_YEAR) == numeroSemana)
                 .toList();
     }
+
+    // Actualizar estado tarea
+    public Tarea actualizarEstado(Long id, String nuevoEstado) {
+    Tarea tarea = tareaRepository.findById(id)
+            .orElseThrow(() -> new IllegalArgumentException("Tarea no encontrada: " + id));
+
+    tarea.setEstado(nuevoEstado);
+
+    if ("COMPLETADA".equalsIgnoreCase(nuevoEstado)) {
+        tarea.setFechaFinalizacion(LocalDate.now());
+    } else {
+        tarea.setFechaFinalizacion(null); // si se desmarca
+    }
+
+    return tareaRepository.save(tarea);
+    }
 }
