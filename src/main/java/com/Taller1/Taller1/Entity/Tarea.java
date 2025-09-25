@@ -2,7 +2,11 @@ package com.Taller1.Taller1.Entity;
 
 import java.time.LocalDate;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -31,6 +35,9 @@ public class Tarea{
     @Column(nullable = false)
     private String estado;
 
+    @Column
+    private LocalDate fechaFinalizacion;
+
     @Override
     public String toString() {
         return "Tarea{" +
@@ -39,6 +46,7 @@ public class Tarea{
                 ", descripcion='" + descripcion + '\'' +
                 ", fechaVencimiento=" + fechaVencimiento +
                 ", estado=" + estado +
+                ", fechaFinalizacion=" + fechaFinalizacion +
                 '}';
     }
 }
