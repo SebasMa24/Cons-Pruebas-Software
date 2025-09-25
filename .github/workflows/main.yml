@@ -35,4 +35,4 @@ jobs:
       - name: Build and analyze
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=SebasMa24_Taller1 -Dsonar.sources=src/main/java,src/main/resources -Dsonar.plsql.database-dictionary=src/main/resources/db-dictionary.sql
+        run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=SebasMa24_Taller1 -Dsonar.sources=src/main/java,src/main/resources -Dsonar.plsql.database-dictionary=src/main/resources/db-dictionary.sql -Dsonar.coverage.exclusions=*/resources/static/,/resources/templates/*
