@@ -5,7 +5,9 @@ import java.time.temporal.IsoFields;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.Taller1.Taller1.Entity.Tarea;
 import com.Taller1.Taller1.Repository.TareaRepository;
@@ -46,7 +48,12 @@ public class TareaService {
     }
 
     public void eliminarTarea(Long id) {
-    tareaRepository.deleteById(id);
+        if (tareaRepository.existsById(id)) {
+            tareaRepository.deleteById(id);
+        } else {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST, "La tarea con ID " + id + " no existe");
+        }
     }
 
 }

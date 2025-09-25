@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
 import java.util.Arrays;
@@ -16,6 +17,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 
 class TareaServiceTest {
@@ -97,6 +99,7 @@ class TareaServiceTest {
     void eliminarTarea_debeEliminarSiExiste() {
         Long id = 1L;
 
+        when(tareaRepository.existsById(id)).thenReturn(true);
         doNothing().when(tareaRepository).deleteById(id);
 
         tareaService.eliminarTarea(id);
@@ -108,9 +111,10 @@ class TareaServiceTest {
     void eliminarTarea_noDebeFallarSiIdNoExiste() {
         Long id = 99L;
 
-        doThrow(new RuntimeException("No existe")).when(tareaRepository).deleteById(id);
+        when(tareaRepository.findById(id)).thenReturn(Optional.empty());
 
-        assertThrows(RuntimeException.class, () -> tareaService.eliminarTarea(id));
-        verify(tareaRepository, times(1)).deleteById(id);
-    }
+        assertThrows(ResponseStatusException.class, () -> tareaService.eliminarTarea(id));
+
+        verify(tareaRepository, never()).deleteById(anyLong());
+        }
 }
