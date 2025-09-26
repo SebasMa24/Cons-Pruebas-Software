@@ -1,1 +1,2 @@
-id,pr,archivo,linea,tipo,severidad,descripcion,estado,reportado_por,decidido_por,comentarios
+id,pr,archivo,linea,tipo,severidad,descripcion,estado,reportado_por
+DEF-004,feature/02-marcar-estado,src/main/java/com/Taller1/Taller1/Controller/TareaController.java,43,estilo,baja,"En el controller se usa cambiarEstado mientras que en el service se emplea actualizarEstado. Esto puede generar confusión y se sugiere unificar bajo 'actualizarEstado'.",ACEPTADO,"Yahir Camilo Forero Santos y Luis Miguel Polo"
