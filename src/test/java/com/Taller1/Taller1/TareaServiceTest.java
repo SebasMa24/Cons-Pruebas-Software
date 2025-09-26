@@ -1,22 +1,29 @@
 package com.Taller1.Taller1;
 
-import com.Taller1.Taller1.Entity.Tarea;
-import com.Taller1.Taller1.Repository.TareaRepository;
-import com.Taller1.Taller1.Service.TareaService;
-
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import static org.mockito.ArgumentMatchers.any;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import org.mockito.MockitoAnnotations;
+import org.springframework.web.server.ResponseStatusException;
+
+import com.Taller1.Taller1.Entity.Tarea;
+import com.Taller1.Taller1.Repository.TareaRepository;
+import com.Taller1.Taller1.Service.TareaService;
 
 class TareaServiceTest {
 
@@ -30,6 +37,8 @@ class TareaServiceTest {
     void setUp() {
         MockitoAnnotations.openMocks(this);
     }
+
+    private Tarea tarea;
 
     @Test
     void obtenerTodas_debeRetornarListaDeTareas() {
@@ -92,4 +101,81 @@ class TareaServiceTest {
         assertEquals(1, resultado.size());
         assertEquals("Tarea Semana 38", resultado.get(0).getTitulo());
     }
+
+    @Test
+void editarTarea_existente_debeActualizarCampos() {
+    LocalDate nuevaFecha = LocalDate.now().plusDays(3);
+    when(tareaRepository.findById(1L)).thenReturn(Optional.of(tarea));
+    when(tareaRepository.save(any(Tarea.class))).thenReturn(tarea);
+
+    Tarea resultado = tareaService.editarTarea(1L, "Título Editado", "Desc Editada", nuevaFecha);
+
+    assertEquals("Título Editado", resultado.getTitulo());
+    assertEquals("Desc Editada", resultado.getDescripcion());
+    assertEquals(nuevaFecha, resultado.getFechaVencimiento());
+    verify(tareaRepository, times(1)).save(tarea);
+}
+
+@Test
+void editarTarea_inexistente_debeLanzarNotFound() {
+    when(tareaRepository.findById(99L)).thenReturn(Optional.empty());
+
+    ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> {
+        tareaService.editarTarea(99L, "Título", "Desc", LocalDate.now());
+    });
+
+    assertEquals("Tarea no encontrada", exception.getReason());
+    verify(tareaRepository, never()).save(any());
+}
+
+@Test
+void editarTarea_conTituloVacio_debeLanzarBadRequest() {
+    when(tareaRepository.findById(1L)).thenReturn(Optional.of(tarea));
+
+    ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> {
+        tareaService.editarTarea(1L, "", "Desc", LocalDate.now());
+    });
+
+    assertEquals("El título de la tarea no puede estar vacío", exception.getReason());
+    verify(tareaRepository, never()).save(any());
+}
+
+@Test
+void editarTarea_conTituloNull_debeLanzarBadRequest() {
+    when(tareaRepository.findById(1L)).thenReturn(Optional.of(tarea));
+
+    ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> {
+        tareaService.editarTarea(1L, null, "Desc", LocalDate.now());
+    });
+
+    assertEquals("El título de la tarea no puede estar vacío", exception.getReason());
+    verify(tareaRepository, never()).save(any());
+}
+
+@Test
+void editarTarea_conTituloMuyLargo_debeLanzarBadRequest() {
+    String tituloLargo = "A".repeat(101);
+    when(tareaRepository.findById(1L)).thenReturn(Optional.of(tarea));
+
+    ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> {
+        tareaService.editarTarea(1L, tituloLargo, "Desc", LocalDate.now());
+    });
+
+    assertEquals("El título de la tarea no puede exceder 100 caracteres", exception.getReason());
+    verify(tareaRepository, never()).save(any());
+}
+
+@Test
+void editarTarea_sinDescripcion_debeActualizarCorrectamente() {
+    LocalDate nuevaFecha = LocalDate.now().plusDays(2);
+    when(tareaRepository.findById(1L)).thenReturn(Optional.of(tarea));
+    when(tareaRepository.save(any(Tarea.class))).thenReturn(tarea);
+
+    Tarea resultado = tareaService.editarTarea(1L, "Título Editado", null, nuevaFecha);
+
+    assertEquals("Título Editado", resultado.getTitulo());
+    assertNull(resultado.getDescripcion());
+    assertEquals(nuevaFecha, resultado.getFechaVencimiento());
+}
+
 }
