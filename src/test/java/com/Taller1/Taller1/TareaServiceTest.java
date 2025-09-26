@@ -279,6 +279,7 @@ class TareaServiceTest {
         assertEquals("Título Editado", resultado.getTitulo());
         assertNull(resultado.getDescripcion());
         assertEquals(nuevaFecha, resultado.getFechaVencimiento());
+    }
     void actualizarEstado_aCompletadaDebeRegistrarFecha() {
         Tarea tarea = new Tarea(1L, "Tarea 1", "Desc", LocalDate.now(), "PENDIENTE");
         when(tareaRepository.findById(1L)).thenReturn(Optional.of(tarea));
