@@ -32,8 +32,8 @@
 
 **Estado final del PR:**  
 
-- [ ] Mergeado  
-- [X] Cambios solicitados  
+- [X] Mergeado  
+- [ ] Cambios solicitados  
 
 **Comentarios finales:**
 > El endpoint /eliminar no sigue del todo las convenciones REST, se podría mejorar a DELETE /tareas/{id}.
