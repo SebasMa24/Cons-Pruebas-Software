@@ -55,15 +55,58 @@ function mostrarMensaje(mensaje, tipo = 'error', tiempo = tipo === 'error' ? 500
 function obtenerDatosFormulario(formElement) {
     return Object.fromEntries(new FormData(formElement));
 }
+
+// ===============================
+// Control de Modal para Editar Tarea
+// ===============================
+const modal = document.getElementById('modal-editar');
+const formEditar = document.getElementById('form-editar-tarea');
+const cancelarBtn = document.getElementById('cancelar-editar');
+
+// Cuando se hace clic en el botón "Editar" de cada tarea
+document.querySelectorAll('.edit-btn').forEach(button => {
+    button.addEventListener('click', () => {
+        // Cargar datos en el formulario
+        document.getElementById('id').value = button.getAttribute('data-id');
+        document.getElementById('titulo').value = button.getAttribute('data-titulo');
+        document.getElementById('descripcion').value = button.getAttribute('data-descripcion');
+        document.getElementById('fechaVencimiento').value = button.getAttribute('data-fecha');
+
+        // Mostrar modal
+        modal.classList.remove('hidden');
+    });
+});
+
+// Cerrar modal sin guardar
+cancelarBtn.addEventListener('click', () => {
+    modal.classList.add('hidden');
+    formEditar.reset();
+});
+
+
 document.getElementById("form-editar-tarea").addEventListener("submit", async function (e) {
     e.preventDefault();
-
+    
     try {
         const datosFormulario = obtenerDatosFormulario(e.target);
+        const idTarea = datosFormulario.id;
 
-        await fetchWithErrorHandling("/editar", "POST", datosFormulario);
+        if (!idTarea) {
+            mostrarMensaje("No se encontró el ID de la tarea", "error");
+            return;
+        }
 
+        const data = {
+            titulo: datosFormulario.titulo,
+            descripcion: datosFormulario.descripcion,
+            fechaVencimiento: datosFormulario.fechaVencimiento
+        };
+
+        await fetchWithErrorHandling(`/tarea/${idTarea}`, "PUT", data);
+        modal.classList.add('hidden');
+        formEditar.reset();
         mostrarMensaje("Tarea editada exitosamente!", "success");
+
     } catch (error) {
         mostrarMensaje(error.message);
     }

@@ -1,14 +1,14 @@
 package com.Taller1.Taller1;
 
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -32,133 +32,184 @@ import com.Taller1.Taller1.Service.TareaService;
 
 class TareaControllerTest {
 
-    @Mock
-    private TareaService tareaService;
+        @Mock
+        private TareaService tareaService;
 
-    @InjectMocks
-    private TareaController tareaController;
+        @InjectMocks
+        private TareaController tareaController;
 
-    private MockMvc mockMvc;
+        private MockMvc mockMvc;
 
-    @BeforeEach
-    void setUp() {
-        MockitoAnnotations.openMocks(this);
-        mockMvc = MockMvcBuilders.standaloneSetup(tareaController).build();
-    }
+        @BeforeEach
+        void setUp() {
+                MockitoAnnotations.openMocks(this);
+                mockMvc = MockMvcBuilders.standaloneSetup(tareaController).build();
+        }
 
-    @Test
-    void listarTareas_debeRetornarVistaIndexConListaTareas() throws Exception {
-        Tarea tarea = new Tarea(1L, "Tarea 1", "Desc 1", LocalDate.now(), "PENDIENTE");
-        when(tareaService.obtenerTodas()).thenReturn(List.of(tarea));
+        @Test
+        void listarTareas_debeRetornarVistaIndexConListaTareas() throws Exception {
+                Tarea tarea = new Tarea(1L, "Tarea 1", "Desc 1", LocalDate.now(), "PENDIENTE");
+                when(tareaService.obtenerTodas()).thenReturn(List.of(tarea));
 
-        mockMvc.perform(get(""))
-                .andExpect(status().isOk())
-                .andExpect(view().name("index"))
-                .andExpect(model().attributeExists("tareas"))
-                .andExpect(model().attribute("tareas", List.of(tarea)));
+                mockMvc.perform(get(""))
+                                .andExpect(status().isOk())
+                                .andExpect(view().name("index"))
+                                .andExpect(model().attributeExists("tareas"))
+                                .andExpect(model().attribute("tareas", List.of(tarea)));
 
-        verify(tareaService, times(1)).obtenerTodas();
-    }
+                verify(tareaService, times(1)).obtenerTodas();
+        }
 
-    @Test
-    void listarTareas_conEstadoDebeFiltrarCorrectamente() throws Exception {
-        Tarea tarea = new Tarea(2L, "Tarea Completada", "Desc", LocalDate.now(), "COMPLETADA");
-        when(tareaService.filtrarPorEstado("COMPLETADA")).thenReturn(List.of(tarea));
+        @Test
+        void listarTareas_conEstadoDebeFiltrarCorrectamente() throws Exception {
+                Tarea tarea = new Tarea(2L, "Tarea Completada", "Desc", LocalDate.now(), "COMPLETADA");
+                when(tareaService.filtrarPorEstado("COMPLETADA")).thenReturn(List.of(tarea));
 
-        mockMvc.perform(get("").param("estado", "COMPLETADA"))
-                .andExpect(status().isOk())
-                .andExpect(view().name("index"))
-                .andExpect(model().attributeExists("tareas"))
-                .andExpect(model().attribute("tareas", List.of(tarea)));
+                mockMvc.perform(get("").param("estado", "COMPLETADA"))
+                                .andExpect(status().isOk())
+                                .andExpect(view().name("index"))
+                                .andExpect(model().attributeExists("tareas"))
+                                .andExpect(model().attribute("tareas", List.of(tarea)));
 
-        verify(tareaService, times(1)).filtrarPorEstado("COMPLETADA");
-    }
+                verify(tareaService, times(1)).filtrarPorEstado("COMPLETADA");
+        }
 
-    @Test
-    void listarTareas_conSemanaDebeFiltrarCorrectamente() throws Exception {
-        Tarea tarea = new Tarea(3L, "Tarea Semana 38", "Desc", LocalDate.of(2025, 9, 18), "PENDIENTE");
-        when(tareaService.filtrarPorSemana(38)).thenReturn(List.of(tarea));
+        @Test
+        void listarTareas_conSemanaDebeFiltrarCorrectamente() throws Exception {
+                Tarea tarea = new Tarea(3L, "Tarea Semana 38", "Desc", LocalDate.of(2025, 9, 18), "PENDIENTE");
+                when(tareaService.filtrarPorSemana(38)).thenReturn(List.of(tarea));
 
-        mockMvc.perform(get("").param("semana", "38"))
-                .andExpect(status().isOk())
-                .andExpect(view().name("index"))
-                .andExpect(model().attributeExists("tareas"))
-                .andExpect(model().attribute("tareas", List.of(tarea)));
+                mockMvc.perform(get("").param("semana", "38"))
+                                .andExpect(status().isOk())
+                                .andExpect(view().name("index"))
+                                .andExpect(model().attributeExists("tareas"))
+                                .andExpect(model().attribute("tareas", List.of(tarea)));
 
-        verify(tareaService, times(1)).filtrarPorSemana(38);
-    }
+                verify(tareaService, times(1)).filtrarPorSemana(38);
+        }
 
-    @Test
-void editarTarea_debeActualizarCorrectamente() {
-    Tarea tareaEditada = new Tarea(1L, "Título Editado", "Desc Editada", LocalDate.now().plusDays(5), "PENDIENTE");
+        @SuppressWarnings("null")
+        @Test
+        void editarTarea_debeActualizarCorrectamente() {
+                // Arrange
+                LocalDate fechaVencimiento = LocalDate.now().plusDays(5);
 
-    when(tareaService.editarTarea(eq(1L), anyString(), anyString(), any(LocalDate.class)))
-            .thenReturn(tareaEditada);
+                Map<String, Object> body = new HashMap<>();
+                body.put("titulo", "Título Editado");
+                body.put("descripcion", "Desc Editada");
+                body.put("fechaVencimiento", fechaVencimiento.toString());
 
-    ResponseEntity<?> response = tareaController.editarTarea(
-            1L, "Título Editado", "Desc Editada", LocalDate.now().plusDays(5));
+                Tarea tareaEditada = new Tarea(1L, "Título Editado", "Desc Editada", fechaVencimiento, "PENDIENTE");
 
-    assertEquals(HttpStatus.OK, response.getStatusCode());
-    assertEquals("Título Editado", ((Tarea) response.getBody()).getTitulo());
-    assertEquals("Desc Editada", ((Tarea) response.getBody()).getDescripcion());
-    verify(tareaService, times(1))
-            .editarTarea(eq(1L), anyString(), anyString(), any(LocalDate.class));
-}
+                when(tareaService.editarTarea(eq(1L), eq("Título Editado"), eq("Desc Editada"), eq(fechaVencimiento)))
+                                .thenReturn(tareaEditada);
 
-@Test
-void editarTarea_conTituloVacio_debeRetornarBadRequest() {
-    when(tareaService.editarTarea(eq(1L), eq(""), anyString(), any(LocalDate.class)))
-            .thenThrow(new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "El título de la tarea no puede estar vacío"));
+                // Act
+                ResponseEntity<?> response = tareaController.editarTarea(1L, body);
 
-    ResponseStatusException exception = assertThrows(
-            ResponseStatusException.class,
-            () -> tareaController.editarTarea(1L, "", "Desc", LocalDate.now()));
+                // Assert
+                assertEquals(HttpStatus.OK, response.getStatusCode());
+                assertEquals("Título Editado", ((Tarea) response.getBody()).getTitulo());
+                assertEquals("Desc Editada", ((Tarea) response.getBody()).getDescripcion());
 
-    assertEquals(HttpStatus.BAD_REQUEST, exception.getStatusCode());
-    assertEquals("El título de la tarea no puede estar vacío", exception.getReason());
-}
+                verify(tareaService, times(1))
+                                .editarTarea(eq(1L), eq("Título Editado"), eq("Desc Editada"), eq(fechaVencimiento));
+        }
 
-@Test
-void editarTarea_conTituloMuyLargo_debeRetornarBadRequest() {
-    String tituloLargo = "A".repeat(101);
-    when(tareaService.editarTarea(eq(1L), eq(tituloLargo), anyString(), any(LocalDate.class)))
-            .thenThrow(new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "El título de la tarea no puede exceder 100 caracteres"));
+        @Test
+        void editarTarea_conTituloVacio_debeRetornarBadRequest() {
+                // Arrange
+                LocalDate fechaVencimiento = LocalDate.now();
 
-    ResponseStatusException exception = assertThrows(
-            ResponseStatusException.class,
-            () -> tareaController.editarTarea(1L, tituloLargo, "Desc", LocalDate.now()));
+                Map<String, Object> body = new HashMap<>();
+                body.put("titulo", ""); // Título vacío
+                body.put("descripcion", "Desc");
+                body.put("fechaVencimiento", fechaVencimiento.toString());
 
-    assertEquals(HttpStatus.BAD_REQUEST, exception.getStatusCode());
-    assertEquals("El título de la tarea no puede exceder 100 caracteres", exception.getReason());
-}
+                when(tareaService.editarTarea(eq(1L), eq(""), eq("Desc"), eq(fechaVencimiento)))
+                                .thenThrow(new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                                                "El título de la tarea no puede estar vacío"));
 
-@Test
-void editarTarea_inexistente_debeRetornarNotFound() {
-    when(tareaService.editarTarea(eq(99L), anyString(), anyString(), any(LocalDate.class)))
-            .thenThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "Tarea no encontrada"));
+                // Act
+                ResponseStatusException exception = assertThrows(
+                                ResponseStatusException.class,
+                                () -> tareaController.editarTarea(1L, body));
 
-    ResponseStatusException exception = assertThrows(
-            ResponseStatusException.class,
-            () -> tareaController.editarTarea(99L, "Título", "Desc", LocalDate.now()));
+                // Assert
+                assertEquals(HttpStatus.BAD_REQUEST, exception.getStatusCode());
+                assertEquals("El título de la tarea no puede estar vacío", exception.getReason());
+        }
 
-    assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
-    assertEquals("Tarea no encontrada", exception.getReason());
-}
+        @Test
+        void editarTarea_conTituloMuyLargo_debeRetornarBadRequest() {
+                // Arrange
+                String tituloLargo = "A".repeat(101);
+                LocalDate fechaVencimiento = LocalDate.now();
 
-@Test
-void editarTarea_conCambioDeFechaVencimiento_debeActualizarFecha() {
-    LocalDate nuevaFecha = LocalDate.now().plusDays(10);
-    Tarea tareaEditada = new Tarea(1L, "Tarea", "Desc", nuevaFecha, "PENDIENTE");
+                Map<String, Object> body = new HashMap<>();
+                body.put("titulo", tituloLargo);
+                body.put("descripcion", "Desc");
+                body.put("fechaVencimiento", fechaVencimiento.toString());
 
-    when(tareaService.editarTarea(eq(1L), anyString(), anyString(), eq(nuevaFecha)))
-            .thenReturn(tareaEditada);
+                when(tareaService.editarTarea(eq(1L), eq(tituloLargo), eq("Desc"), eq(fechaVencimiento)))
+                                .thenThrow(new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                                                "El título de la tarea no puede exceder 100 caracteres"));
 
-    ResponseEntity<?> response = tareaController.editarTarea(1L, "Tarea", "Desc", nuevaFecha);
+                // Act
+                ResponseStatusException exception = assertThrows(
+                                ResponseStatusException.class,
+                                () -> tareaController.editarTarea(1L, body));
 
-    assertEquals(HttpStatus.OK, response.getStatusCode());
-    assertEquals(nuevaFecha, ((Tarea) response.getBody()).getFechaVencimiento());
-}
+                // Assert
+                assertEquals(HttpStatus.BAD_REQUEST, exception.getStatusCode());
+                assertEquals("El título de la tarea no puede exceder 100 caracteres", exception.getReason());
+        }
+
+        @Test
+        void editarTarea_inexistente_debeRetornarNotFound() {
+                // Arrange
+                LocalDate fechaVencimiento = LocalDate.now();
+
+                Map<String, Object> body = new HashMap<>();
+                body.put("titulo", "Título");
+                body.put("descripcion", "Desc");
+                body.put("fechaVencimiento", fechaVencimiento.toString());
+
+                when(tareaService.editarTarea(eq(99L), eq("Título"), eq("Desc"), eq(fechaVencimiento)))
+                                .thenThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "Tarea no encontrada"));
+
+                // Act
+                ResponseStatusException exception = assertThrows(
+                                ResponseStatusException.class,
+                                () -> tareaController.editarTarea(99L, body));
+
+                // Assert
+                assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
+                assertEquals("Tarea no encontrada", exception.getReason());
+        }
+
+        @SuppressWarnings("null")
+        @Test
+        void editarTarea_conCambioDeFechaVencimiento_debeActualizarFecha() {
+                // Arrange
+                LocalDate nuevaFecha = LocalDate.now().plusDays(10);
+
+                Map<String, Object> body = new HashMap<>();
+                body.put("titulo", "Tarea");
+                body.put("descripcion", "Desc");
+                body.put("fechaVencimiento", nuevaFecha.toString());
+
+                Tarea tareaEditada = new Tarea(1L, "Tarea", "Desc", nuevaFecha, "PENDIENTE");
+
+                when(tareaService.editarTarea(eq(1L), eq("Tarea"), eq("Desc"), eq(nuevaFecha)))
+                                .thenReturn(tareaEditada);
+
+                // Act
+                ResponseEntity<?> response = tareaController.editarTarea(1L, body);
+
+                // Assert
+                assertEquals(HttpStatus.OK, response.getStatusCode());
+                assertEquals(nuevaFecha, ((Tarea) response.getBody()).getFechaVencimiento());
+        }
 
 }
