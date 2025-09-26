@@ -1,20 +1,20 @@
-# Checklist de Revisión de Código - PR #<#>
+# Checklist de Revisión de Código - PR #<9>
 
-**Título del PR:**  
-**Autor/a:**  
-**Revisores/as:**  
-**Fecha de revisión:**  
+**Título del PR: Feature/editar**  
+**Autor/a: Yahir Camilo Forero Santos**  
+**Revisores/as: Luis Miguel Polo y Luis Sebastian Martinez Guerrero**  
+**Fecha de revisión: 26/09/2025**  
 
 ---
 
 ## 1. Criterios de Aceptación
 
-- [ ] Se cumple el flujo principal de la historia de usuario.
-- [ ] Se manejan casos borde (entrada vacía, no encontrada, errores).
-- [ ] La funcionalidad cumple con la definición de “Hecho” (DoD).
+- [X] Se cumple el flujo principal de la historia de usuario.
+- [X] Se manejan casos borde (entrada vacía, no encontrada, errores).
+- [X] La funcionalidad cumple con la definición de “Hecho” (DoD).
 
 > Observaciones:  
-> _..._
+> Caso borde no contemplado: entrada vacía
 
 ---
 
@@ -32,22 +32,22 @@
 
 ## 3. Evidencias y Pruebas
 
-- [ ] Incluye al menos una prueba ejecutable en `/tests`.
+- [X] Incluye al menos una prueba ejecutable en `/tests`.
 - [ ] Evidencia adjunta (captura o video en la descripción del PR).
-- [ ] Todas las pruebas pasan correctamente.
+- [X] Todas las pruebas pasan correctamente.
 
 > Observaciones:  
-> _..._
+> Dado que se ejecuta una prueba estatica no es necesario adjuntar una evidencia.
 
 ---
 
 ## 4. GitHub Actions
 
-- [ ] Workflow de `Static Analysis` ejecutado correctamente.
-- [ ] El PR muestra el check en verde antes del merge.
+- [X] Workflow de `Static Analysis` ejecutado correctamente.
+- [X] El PR muestra el check en verde antes del merge.
 
 > Observaciones:  
-> _..._
+> Ninguna.
 
 ---
 
@@ -55,11 +55,11 @@
 
 **Estado final del PR:**  
 
-- [ ] Mergeado  
+- [X] Mergeado  
 - [ ] Cambios solicitados  
 
 **Comentarios finales:**
-> _..._
+> Todo correcto y listo para realizar merge.
 
 ---
 
