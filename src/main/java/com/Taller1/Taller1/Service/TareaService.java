@@ -49,9 +49,12 @@ public class TareaService {
 
     // Crear una nueva tarea
     public Tarea crearTarea(Tarea tarea) {
-        if (tareaRepository.existsById(tarea.getId())) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "La tarea con ID " + tarea.getId() + " ya existe");
+        if(tarea.getId() != null){
+            if (tareaRepository.existsById(tarea.getId())) {
+                throw new ResponseStatusException(HttpStatus.CONFLICT, "La tarea con ID " + tarea.getId() + " ya existe");
+            }
         }
+        
         if (tarea.getTitulo() == null || tarea.getTitulo().isEmpty()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El título de la tarea no puede estar vacío");
         }
