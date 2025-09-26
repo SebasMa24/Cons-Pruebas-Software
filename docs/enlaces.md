@@ -27,7 +27,7 @@ Este documento recopila los enlaces principales del taller 1, incluyendo Issues,
 |-------|---------------------     |----------------------------------------------------|-----------|
 | HU-01 | feature/01-insertar      | [PR #](https://github.com/SebasMa24/Taller1/pulls) | No Subido |
 | HU-02 | feature/02-estado_tarea  | [PR #](https://github.com/SebasMa24/Taller1/pulls) | No Subido |
-| HU-03 | feature/03-editar        | [PR #](https://github.com/SebasMa24/Taller1/pulls/9) | Mergeado |
+| HU-03 | feature/03-editar        | [PR #9](https://github.com/SebasMa24/Taller1/pulls/9) | Mergeado |
 | HU-04 | feature/03-eliminar      | [PR #](https://github.com/SebasMa24/Taller1/pulls) | No Subido |
 
 ---
