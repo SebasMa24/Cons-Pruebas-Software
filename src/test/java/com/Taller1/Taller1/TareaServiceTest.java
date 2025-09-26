@@ -52,6 +52,18 @@ class TareaServiceTest {
     }
 
     @Test
+    void crearTarea_conIdExistente_debeLanzarExcepcion() {
+        when(tareaRepository.existsById(tarea.getId())).thenReturn(true);
+
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> {
+            tareaService.crearTarea(tarea);
+        });
+
+        assertEquals("La tarea con ID " + tarea.getId() + " ya existe", exception.getReason());
+        verify(tareaRepository, never()).save(any());
+    }
+
+    @Test
     void crearTarea_conTituloVacio_debeLanzarExcepcion() {
         tarea.setTitulo("");
 
