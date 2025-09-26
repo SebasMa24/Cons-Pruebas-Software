@@ -56,6 +56,7 @@ function obtenerDatosFormulario(formElement) {
     return Object.fromEntries(new FormData(formElement));
 }
 
+
 // ===============================
 // Control de Modal para Editar Tarea
 // ===============================
@@ -112,3 +113,16 @@ document.getElementById("form-editar-tarea").addEventListener("submit", async fu
     }
 });
 
+
+document.getElementById("form-tarea").addEventListener("submit", async function (e) {
+    e.preventDefault();
+
+    try {
+        const datosFormulario = obtenerDatosFormulario(e.target);
+        await fetchWithErrorHandling("/tarea", "POST", datosFormulario);
+        e.target.reset();
+        mostrarMensaje("Tarea creada exitosamente!", "success");
+    } catch (error) {
+        mostrarMensaje(error.message);
+    }
+});

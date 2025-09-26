@@ -5,22 +5,28 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.springframework.web.server.ResponseStatusException;
+
+// JUnit Assertions
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+
+// Mockito
 import static org.mockito.ArgumentMatchers.any;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import org.mockito.MockitoAnnotations;
-import org.springframework.web.server.ResponseStatusException;
 
+// Proyecto
 import com.Taller1.Taller1.Entity.Tarea;
 import com.Taller1.Taller1.Repository.TareaRepository;
 import com.Taller1.Taller1.Service.TareaService;
@@ -33,9 +39,108 @@ class TareaServiceTest {
     @InjectMocks
     private TareaService tareaService;
 
+    private Tarea tarea;
+
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
+        tarea = new Tarea();
+        tarea.setId(1L);
+        tarea.setTitulo("Tarea de prueba");
+        tarea.setDescripcion("Descripción de prueba");
+        tarea.setEstado("PENDIENTE");
+    }
+
+    @Test
+    void crearTarea_conTituloValido_debeGuardarTarea() {
+        when(tareaRepository.save(any(Tarea.class))).thenReturn(tarea);
+
+        Tarea resultado = tareaService.crearTarea(tarea);
+
+        assertNotNull(resultado);
+        assertEquals("Tarea de prueba", resultado.getTitulo());
+        verify(tareaRepository, times(1)).save(tarea);
+    }
+
+    @Test
+    void crearTarea_conIdExistente_debeLanzarExcepcion() {
+        when(tareaRepository.existsById(tarea.getId())).thenReturn(true);
+
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> {
+            tareaService.crearTarea(tarea);
+        });
+
+        assertEquals("La tarea con ID " + tarea.getId() + " ya existe", exception.getReason());
+        verify(tareaRepository, never()).save(any());
+    }
+
+    @Test
+    void crearTarea_conTituloVacio_debeLanzarExcepcion() {
+        tarea.setTitulo("");
+
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> {
+            tareaService.crearTarea(tarea);
+        });
+
+        assertEquals("El título de la tarea no puede estar vacío", exception.getReason());
+        verify(tareaRepository, never()).save(any());
+    }
+
+    @Test
+    void crearTarea_conTituloNull_debeLanzarExcepcion() {
+        tarea.setTitulo(null);
+
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> {
+            tareaService.crearTarea(tarea);
+        });
+
+        assertEquals("El título de la tarea no puede estar vacío", exception.getReason());
+    }
+
+    @Test
+    void crearTarea_conTituloMuyLargo_debeLanzarExcepcion() {
+        tarea.setTitulo("A".repeat(101));
+
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> {
+            tareaService.crearTarea(tarea);
+        });
+
+        assertEquals("El título de la tarea no puede exceder 100 caracteres", exception.getReason());
+    }
+
+    @Test
+    void crearTarea_conTituloEnLimite_debeGuardarCorrectamente() {
+        tarea.setTitulo("A".repeat(100));
+        when(tareaRepository.save(any(Tarea.class))).thenReturn(tarea);
+
+        Tarea resultado = tareaService.crearTarea(tarea);
+
+        assertNotNull(resultado);
+        assertEquals(100, resultado.getTitulo().length());
+        verify(tareaRepository, times(1)).save(tarea);
+    }
+
+    @Test
+    void crearTarea_conDescripcionNull_debeGuardarCorrectamente() {
+        tarea.setDescripcion(null);
+        when(tareaRepository.save(any(Tarea.class))).thenReturn(tarea);
+
+        Tarea resultado = tareaService.crearTarea(tarea);
+
+        assertNotNull(resultado);
+        assertNull(resultado.getDescripcion());
+    }
+
+    @Test
+    void crearTarea_conFechaVencimiento_debeGuardarCorrectamente() {
+        LocalDate fecha = LocalDate.now().plusDays(5);
+        tarea.setFechaVencimiento(fecha);
+        when(tareaRepository.save(any(Tarea.class))).thenReturn(tarea);
+
+        Tarea resultado = tareaService.crearTarea(tarea);
+
+        assertNotNull(resultado);
+        assertEquals(fecha, resultado.getFechaVencimiento());
     }
 
     @Test
@@ -174,6 +279,39 @@ class TareaServiceTest {
         assertEquals("Título Editado", resultado.getTitulo());
         assertNull(resultado.getDescripcion());
         assertEquals(nuevaFecha, resultado.getFechaVencimiento());
+    void actualizarEstado_aCompletadaDebeRegistrarFecha() {
+        Tarea tarea = new Tarea(1L, "Tarea 1", "Desc", LocalDate.now(), "PENDIENTE");
+        when(tareaRepository.findById(1L)).thenReturn(Optional.of(tarea));
+        when(tareaRepository.save(any(Tarea.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        Tarea resultado = tareaService.actualizarEstado(1L, "COMPLETADA");
+
+        assertEquals("COMPLETADA", resultado.getEstado());
+        assertNotNull(resultado.getFechaFinalizacion());
+        verify(tareaRepository).save(tarea);
     }
 
+    @Test
+    void actualizarEstado_aPendienteDebeLimpiarFechaFinalizacion() {
+        Tarea tarea = new Tarea(2L, "Tarea 2", "Desc", LocalDate.now(), "COMPLETADA");
+        tarea.setFechaFinalizacion(LocalDate.now().minusDays(1));
+
+        when(tareaRepository.findById(2L)).thenReturn(Optional.of(tarea));
+        when(tareaRepository.save(any(Tarea.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        Tarea resultado = tareaService.actualizarEstado(2L, "PENDIENTE");
+
+        assertEquals("PENDIENTE", resultado.getEstado());
+        assertNull(resultado.getFechaFinalizacion());
+    }
+
+    @Test
+    void actualizarEstado_siNoExisteDebeLanzarExcepcion() {
+        when(tareaRepository.findById(99L)).thenReturn(Optional.empty());
+
+        IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class, () -> {
+            tareaService.actualizarEstado(99L, "COMPLETADA");
+        });
+        assertNotNull(thrown);
+    }
 }

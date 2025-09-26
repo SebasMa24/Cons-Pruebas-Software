@@ -47,10 +47,10 @@ Cada historia de usuario (HU) contará con:
 
 | Historia de Usuario      | Integrante (Autor/a)             |
 |--------------------------|----------------------------------|
-| HU-1: Búsqueda            | Luis Sebastian Martinez Guerrero |
-| HU-2: Validación          | Miguel Angel Veloza              |
-| HU-3: Listado             | Yahir Camilo Forero Santos       |
-| HU-4: Otra funcionalidad  | Luis Miguel Polo                  |
+| HU-1: Insertar            | Luis Sebastian Martinez Guerrero |
+| HU-2: Cambiar estado          | Miguel Angel Veloza              |
+| HU-3: Editar             | Yahir Camilo Forero Santos       |
+| HU-4: Eliminar  | Luis Miguel Polo                  |
 
 ---
 

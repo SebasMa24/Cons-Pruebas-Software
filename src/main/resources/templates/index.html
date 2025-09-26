@@ -57,6 +57,30 @@
   <main class="max-w-3xl mx-auto p-6">
     <!-- Popup de error -->
     <div id="error-popup" class="hidden fixed top-4 right-4 bg-red-500 text-black px-4 py-2 rounded shadow-lg"></div>
+
+    <!-- Formulario para agregar tarea -->
+    <section class="bg-white rounded-lg shadow-md p-6 mb-6">
+      <h2 class="text-xl font-semibold mb-4">Agregar Nueva Tarea</h2>
+      <form id="form-tarea" th:object="${tareaNueva}" class="space-y-4">
+        <div>
+          <label for="titulo" class="block text-gray-700 font-medium mb-1">Título</label>
+          <input type="text" id="titulo" name="titulo" th:field="*{titulo}" placeholder="Título de la tarea"
+            class="w-full text-ellipsis border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400" required/>
+        </div>
+        <div>
+          <label for="descripcion" class="block text-gray-700 font-medium mb-1">Descripción</label>
+          <textarea id="descripcion" name="descripcion" th:field="*{descripcion}" placeholder="Descripción de la tarea"
+            class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"></textarea>
+        </div>
+        <div>
+          <label for="fechaVencimiento" class="block text-gray-700 font-medium mb-1">Fecha de Vencimiento</label>
+          <input type="date" id="fechaVencimiento" name="fechaVencimiento" th:field="*{fechaVencimiento}"
+            class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400" required/>
+        <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition">
+          Agregar tarea
+        </button>
+      </form>
+    </section>
     
     <!-- Listado de tareas -->
     <section class="bg-white rounded-lg shadow-md p-6">
@@ -69,8 +93,10 @@
 
       <!-- Listado de tareas en tarjetas -->
       <div th:if="${!#lists.isEmpty(tareas)}" class="space-y-4">
-        <div th:each="tarea : ${tareas}" class="bg-white shadow-md rounded-lg p-4 border border-gray-200">
+        <div th:each="tarea : ${tareas}" class="bg-white shadow-md rounded-lg p-4 border border-gray-200"  th:classappend="${tarea.estado == 'COMPLETADA'} ? 'opacity-60 line-through' : ''">
 
+           <!-- Form para cambiar estado -->
+        <form th:action="@{'/tareas/' + ${tarea.id} + '/estado'}" method="post" class="flex justify-between items-center p-4 rounded-lg shadow-sm">
           <!-- Título -->
           <h2 class="text-lg font-semibold text-gray-800 mb-2" th:text="${tarea.titulo}">
             Título de la tarea
@@ -81,19 +107,22 @@
             Descripción de la tarea
           </p>
 
+          <select name="estado" onchange="this.form.submit()" class="px-2 py-1 border rounded text-sm" th:classappend="${tarea.estado == 'COMPLETADA'} ? 'bg-green-100 text-green-800' :
+                                  (${tarea.estado == 'PENDIENTE'} ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800')">
+            <option th:value="'PENDIENTE'" th:selected="${tarea.estado == 'PENDIENTE'}">Pendiente</option>
+            <option th:value="'EN_PROGRESO'" th:selected="${tarea.estado == 'EN_PROGRESO'}">En Progreso</option>
+            <option th:value="'COMPLETADA'" th:selected="${tarea.estado == 'COMPLETADA'}">Completada</option>
+          </select>
+          </form>
           <!-- Información inferior -->
           <div class="flex justify-between items-center">
             <!-- Fecha -->
             <span class="text-xs text-gray-500" th:text="${#temporals.format(tarea.fechaVencimiento, 'dd/MM/yyyy')}">
               20/09/2025
             </span>
-
-            <!-- Estado -->
-            <span class="px-2 py-1 text-xs rounded-full font-medium" th:text="${tarea.estado}"
-              th:classappend="${tarea.estado == 'COMPLETADA'} ? 'bg-green-100 text-green-800' :
-                                  (tarea.estado == 'EN_PROGRESO' ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800')">
-              Estado
-            </span>
+            <span class="text-xs text-gray-400 italic block"
+              th:if="${tarea.fechaFinalizacion != null}"
+              th:text="'Finalizada: ' + ${#temporals.format(tarea.fechaFinalizacion, 'dd/MM/yyyy')}"></span>
           </div>
           <button 
               type="button" 

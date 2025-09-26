@@ -4,12 +4,14 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -40,7 +42,14 @@ public class TareaController {
 
         model.addAttribute("tareaEditar", new Tarea());
         model.addAttribute("tareas", tareas);
+        model.addAttribute("tareaNueva", new Tarea());
         return "index";
+    }
+  
+    @PostMapping("/tarea")
+    public ResponseEntity<?> crearTarea(@RequestBody Tarea tareaNueva) {
+        Tarea creada = tareaService.crearTarea(tareaNueva);
+        return ResponseEntity.status(HttpStatus.CREATED).body(creada);
     }
 
     @PutMapping("/tarea/{id}")
@@ -55,4 +64,11 @@ public class TareaController {
         Tarea tareaEditada = tareaService.editarTarea(id, titulo, descripcion, fechaVencimiento);
         return ResponseEntity.ok(tareaEditada);
     }
+
+    @PostMapping("/tareas/{id}/estado")
+    public String cambiarEstado(@PathVariable Long id,
+                                @RequestParam String estado) {
+        tareaService.actualizarEstado(id, estado);
+        return "redirect:/"; // redirige a la lista principal
+    }  
 }

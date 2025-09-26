@@ -1,5 +1,8 @@
 id,pr,archivo,linea,tipo,severidad,descripcion,estado,reportado_por
-
-DEF-001,9,N/A,##,Funcionalidad,Alta,"Dado que el usuario desea editar una tarea, Cuando el usuario hace clic en el icono de editar junto a una tarea, Entonces debe aparecer un formulario para modificar la tarea. Pull request no cumple los criterios de aceptacion para Merge.",Pendiente,LuisBuilds11
-DEF-002,9,N/A,##,Funcionalidad,Alta,"No cumple con el criterio de aceptación 1 por lo que se solicitan cambios agregando esta funcionalidad.",Pendiente,SebasMa24
-DEF-003,9,src/main/resources/static/script.js,57,estilo,Baja,"Se considera para una futura modificación que cuando se edite alguna tarea sea visible al momento de aceptar los cambios",Aceptado,SebasMa24
+DEF-001,6,TareaService.java,51,Funcionalidad,Alta,"Permite crear/actualizar una tarea con un ID existente, sobrescribiendo datos.",Pendiente,MiguelVeloza
+DEF-002,6,index.html,26,UI/Visual,Baja,"El texto de tareas largas se desborda del contenedor, afectando la visualización.",Aceptado,MiguelVeloza
+DEF-003,6,TareaController.java,45,Configuración,Media,"El endpoint para crear tareas está en la raíz / en lugar de /tareas, lo que puede generar conflictos.",Pendiente,MiguelVeloza
+DEF-004,feature/02-marcar-estado,src/main/java/com/Taller1/Taller1/Controller/TareaController.java,43,estilo,baja,"En el controller se usa cambiarEstado mientras que en el service se emplea actualizarEstado. Esto puede generar confusión y se sugiere unificar bajo 'actualizarEstado'.",ACEPTADO,"Yahir Camilo Forero Santos y Luis Miguel Polo"
+DEF-005,9,N/A,##,Funcionalidad,Alta,"Dado que el usuario desea editar una tarea, Cuando el usuario hace clic en el icono de editar junto a una tarea, Entonces debe aparecer un formulario para modificar la tarea. Pull request no cumple los criterios de aceptacion para Merge.",Pendiente,LuisBuilds11
+DEF-006,9,N/A,##,Funcionalidad,Alta,"No cumple con el criterio de aceptación 1 por lo que se solicitan cambios agregando esta funcionalidad.",Pendiente,SebasMa24
+DEF-007,9,src/main/resources/static/script.js,57,estilo,Baja,"Se considera para una futura modificación que cuando se edite alguna tarea sea visible al momento de aceptar los cambios",Aceptado,SebasMa24
