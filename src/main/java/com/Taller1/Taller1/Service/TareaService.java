@@ -61,4 +61,19 @@ public class TareaService {
         tarea.setEstado("PENDIENTE");
         return tareaRepository.save(tarea);
     }
+    // Actualizar estado tarea
+    public Tarea actualizarEstado(Long id, String nuevoEstado) {
+    Tarea tarea = tareaRepository.findById(id)
+            .orElseThrow(() -> new IllegalArgumentException("Tarea no encontrada: " + id));
+
+    tarea.setEstado(nuevoEstado);
+
+    if ("COMPLETADA".equalsIgnoreCase(nuevoEstado)) {
+        tarea.setFechaFinalizacion(LocalDate.now());
+    } else {
+        tarea.setFechaFinalizacion(null); // si se desmarca
+    }
+
+    return tareaRepository.save(tarea);
+    }
 }

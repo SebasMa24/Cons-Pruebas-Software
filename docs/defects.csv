@@ -1,4 +1,6 @@
 id,pr,archivo,linea,tipo,severidad,descripcion,estado,reportado_por
+
 DEF-001,6,TareaService.java,51,Funcionalidad,Alta,"Permite crear/actualizar una tarea con un ID existente, sobrescribiendo datos.",Pendiente,MiguelVeloza
 DEF-002,6,index.html,26,UI/Visual,Baja,"El texto de tareas largas se desborda del contenedor, afectando la visualización.",Aceptado,MiguelVeloza
 DEF-003,6,TareaController.java,45,Configuración,Media,"El endpoint para crear tareas está en la raíz / en lugar de /tareas, lo que puede generar conflictos.",Pendiente,MiguelVeloza
+DEF-004,feature/02-marcar-estado,src/main/java/com/Taller1/Taller1/Controller/TareaController.java,43,estilo,baja,"En el controller se usa cambiarEstado mientras que en el service se emplea actualizarEstado. Esto puede generar confusión y se sugiere unificar bajo 'actualizarEstado'.",ACEPTADO,"Yahir Camilo Forero Santos y Luis Miguel Polo"

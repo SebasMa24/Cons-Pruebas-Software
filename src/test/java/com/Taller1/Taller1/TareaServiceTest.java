@@ -1,8 +1,9 @@
 package com.Taller1.Taller1;
 
-import com.Taller1.Taller1.Entity.Tarea;
-import com.Taller1.Taller1.Repository.TareaRepository;
-import com.Taller1.Taller1.Service.TareaService;
+import java.time.LocalDate;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -11,14 +12,24 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.time.LocalDate;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+// JUnit Assertions
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import static org.junit.jupiter.api.Assertions.*;
+// Mockito
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.never;
+
+// Proyecto
+import com.Taller1.Taller1.Entity.Tarea;
+import com.Taller1.Taller1.Repository.TareaRepository;
+import com.Taller1.Taller1.Service.TareaService;
 
 class TareaServiceTest {
 
@@ -193,4 +204,42 @@ class TareaServiceTest {
         assertEquals(1, resultado.size());
         assertEquals("Tarea Semana 38", resultado.get(0).getTitulo());
     }
+
+    @Test
+    void actualizarEstado_aCompletadaDebeRegistrarFecha() {
+        Tarea tarea = new Tarea(1L, "Tarea 1", "Desc", LocalDate.now(), "PENDIENTE");
+        when(tareaRepository.findById(1L)).thenReturn(Optional.of(tarea));
+        when(tareaRepository.save(any(Tarea.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        Tarea resultado = tareaService.actualizarEstado(1L, "COMPLETADA");
+
+        assertEquals("COMPLETADA", resultado.getEstado());
+        assertNotNull(resultado.getFechaFinalizacion());
+        verify(tareaRepository).save(tarea);
+    }
+
+    @Test
+    void actualizarEstado_aPendienteDebeLimpiarFechaFinalizacion() {
+        Tarea tarea = new Tarea(2L, "Tarea 2", "Desc", LocalDate.now(), "COMPLETADA");
+        tarea.setFechaFinalizacion(LocalDate.now().minusDays(1));
+
+        when(tareaRepository.findById(2L)).thenReturn(Optional.of(tarea));
+        when(tareaRepository.save(any(Tarea.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        Tarea resultado = tareaService.actualizarEstado(2L, "PENDIENTE");
+
+        assertEquals("PENDIENTE", resultado.getEstado());
+        assertNull(resultado.getFechaFinalizacion());
+    }
+
+    @Test
+    void actualizarEstado_siNoExisteDebeLanzarExcepcion() {
+        when(tareaRepository.findById(99L)).thenReturn(Optional.empty());
+
+        IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class, () -> {
+            tareaService.actualizarEstado(99L, "COMPLETADA");
+        });
+        assertNotNull(thrown);
+    }
+
 }
