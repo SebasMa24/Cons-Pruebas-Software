@@ -45,13 +45,13 @@ jobs:
           name: junit-reports
           path: target/surefire-reports/
 
-      - name: Build and analyze
+      - name: SonarCloud analysis
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=SebasMa24_Taller1 -Dsonar.sources=src/main/java -Dsonar.plsql.database-dictionary=src/main/resources/db-dictionary.sql -Dsonar.coverage.exclusions=*/resources/static/,/resources/templates/*
-      
+        run: mvn sonar:sonar -Dsonar.projectKey=SebasMa24_Taller1 -Dsonar.sources=src/main/java -Dsonar.plsql.database-dictionary=src/main/resources/db-dictionary.sql -Dsonar.coverage.exclusions=*/resources/static/,/resources/templates/*
+        
       - name: Package JAR
-        run: mvn clean install
+        run: mvn clean package -DskipTest
       
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
@@ -89,5 +89,6 @@ jobs:
           package: '*.jar'
 
           
+
 
 
