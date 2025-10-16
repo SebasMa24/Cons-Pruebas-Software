@@ -18,7 +18,7 @@ env:
   DISTRIBUTION: 'microsoft'
   SONAR_HOST_URL: 'https://sonarcloud.io'
   SONAR_PROJECT_KEY: 'SebasMa24_Taller1'
-  SONAR_ORGANIZATION: 'SebasMa24'
+  SONAR_ORGANIZATION: 'sebasma24'
   AZURE_APP_NAME: 'Actividad5'
   SLOT_NAME: 'Production'
 
@@ -96,4 +96,5 @@ jobs:
           app-name: ${{ env.AZURE_APP_NAME }}
           slot-name: ${{ env.SLOT_NAME }}
           package: target/*.jar
+
 
