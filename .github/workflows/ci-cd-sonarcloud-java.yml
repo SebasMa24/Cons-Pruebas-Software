@@ -18,7 +18,7 @@ env:
   DISTRIBUTION: 'microsoft'
   SONAR_HOST_URL: 'https://sonarcloud.io'
   SONAR_PROJECT_KEY: 'SebasMa24_Taller1'
-  SONAR_ORGANIZATION: 'SebasMa24' # cambia si es necesario
+  SONAR_ORGANIZATION: 'SebasMa24'
   AZURE_APP_NAME: 'Actividad5'
   SLOT_NAME: 'Production'
 
@@ -31,7 +31,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # necesario para análisis SonarCloud completo
+          fetch-depth: 0
 
       - name: Set up Java
         uses: actions/setup-java@v4
@@ -96,3 +96,4 @@ jobs:
           app-name: ${{ env.AZURE_APP_NAME }}
           slot-name: ${{ env.SLOT_NAME }}
           package: target/*.jar
+
