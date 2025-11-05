@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -33,10 +34,16 @@ public class TareaController {
             @RequestParam(required = false) Integer semana) {
 
         List<Tarea> tareas;
+
+        //Si hay estado, se filtra por estado
         if (estado != null && !estado.isEmpty()) {
             tareas = tareaService.filtrarPorEstado(estado);
+
+        //Si no hay estado, pero sí semana, se filtra por semana
         } else if (semana != null && semana > 0) {
             tareas = tareaService.filtrarPorSemana(semana);
+
+        //Si no hay ni estado ni semana, se muestran todas
         } else {
             tareas = tareaService.obtenerTodas();
         }
@@ -44,6 +51,8 @@ public class TareaController {
         model.addAttribute("tareaEditar", new Tarea());
         model.addAttribute("tareas", tareas);
         model.addAttribute("tareaNueva", new Tarea());
+        model.addAttribute("estado", estado != null ? estado : ""); // ✅ asegura que nunca sea null
+
         return "index";
     }
   
@@ -82,5 +91,11 @@ public class TareaController {
         tareaService.actualizarEstado(id, estado);
         return "redirect:/"; // redirige a la lista principal
     }  
+
+    @PostMapping("/guardar")
+    public String guardarTarea(@ModelAttribute("tareaNueva") Tarea tareaNueva) {
+        tareaService.crearTarea(tareaNueva);
+        return "redirect:/";
+    }
 }
 
