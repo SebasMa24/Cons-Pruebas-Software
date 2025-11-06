@@ -75,7 +75,7 @@ jobs:
     name: Deploy to Azure Web App
     runs-on: ubuntu-latest
     needs: build_test_and_sonar
-    if: ${{ github.ref == 'refs/heads/main' }}
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
 
     permissions:
       id-token: write
@@ -100,6 +100,7 @@ jobs:
           app-name: ${{ env.AZURE_APP_NAME }}
           slot-name: ${{ env.SLOT_NAME }}
           package: '*.jar'
+
 
 
 
