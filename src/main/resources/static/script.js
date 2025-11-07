@@ -64,27 +64,21 @@ const modal = document.getElementById('modal-editar');
 const formEditar = document.getElementById('form-editar-tarea');
 const cancelarBtn = document.getElementById('cancelar-editar');
 
-// Cuando se hace clic en el botón "Editar" de cada tarea
 document.querySelectorAll('.edit-btn').forEach(button => {
     button.addEventListener('click', () => {
-        // Cargar datos en el formulario
         document.getElementById('id').value = button.getAttribute('data-id');
         document.getElementById('titulo').value = button.getAttribute('data-titulo');
         document.getElementById('descripcion').value = button.getAttribute('data-descripcion');
         document.getElementById('fechaVencimiento').value = button.getAttribute('data-fecha');
         document.getElementById('recordatorio').value = button.getAttribute('data-recordatorio');
-
-        // Mostrar modal
         modal.classList.remove('hidden');
     });
 });
 
-// Cerrar modal sin guardar
 cancelarBtn.addEventListener('click', () => {
     modal.classList.add('hidden');
     formEditar.reset();
 });
-
 
 document.getElementById("form-editar-tarea").addEventListener("submit", async function (e) {
     e.preventDefault();
@@ -115,7 +109,6 @@ document.getElementById("form-editar-tarea").addEventListener("submit", async fu
     }
 });
 
-
 document.getElementById("form-tarea").addEventListener("submit", async function (e) {
     e.preventDefault();
 
@@ -128,28 +121,18 @@ document.getElementById("form-tarea").addEventListener("submit", async function 
         mostrarMensaje(error.message);
     }
 });
-// script.js - Recordatorios con toast minimalista
 
-// ----------------------------
-// Utilidad: convertir fecha a Date
-// ----------------------------
+
+// ===============================
+// HU7: Recordatorios (Toast)
+// ===============================
 function parseFecha(fechaStr) {
   if (!fechaStr) return null;
   if (fechaStr instanceof Date) return fechaStr;
-
-  const m = String(fechaStr).match(/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})(?::(\d{2}))?/);
-  if (m) {
-    const [_, y, mo, d, h, mi, s] = m;
-    return new Date(y, mo - 1, d, h, mi, s || 0);
-  }
-
   const parsed = Date.parse(fechaStr);
   return isNaN(parsed) ? null : new Date(parsed);
 }
 
-// ----------------------------
-// Toast visual simple
-// ----------------------------
 function mostrarToast(mensaje) {
   let toast = document.getElementById("recordatorio-toast");
   if (!toast) {
@@ -168,9 +151,6 @@ function mostrarToast(mensaje) {
   setTimeout(() => { toast.style.opacity = "0"; }, 7000);
 }
 
-// ----------------------------
-// Lógica principal
-// ----------------------------
 function iniciarRecordatorios({ intervaloSeg = 30 } = {}) {
   const raw = window._TASKS_FROM_SERVER ?? window.recordatorios ?? [];
   if (!Array.isArray(raw) || raw.length === 0) return;
@@ -185,9 +165,8 @@ function iniciarRecordatorios({ intervaloSeg = 30 } = {}) {
     const ahora = new Date();
     tareas.forEach(t => {
       if (!t._fechaObj || t._notificado) return;
-
       const diffMs = t._fechaObj.getTime() - ahora.getTime();
-      if (diffMs <= 0 && diffMs > -60000) { // dentro del último minuto
+      if (diffMs <= 0 && diffMs > -60000) {
         mostrarToast(`⏰ Recordatorio: ${t.titulo}${t.descripcion ? " — " + t.descripcion : ""}`);
         t._notificado = true;
       }
@@ -198,13 +177,69 @@ function iniciarRecordatorios({ intervaloSeg = 30 } = {}) {
   setInterval(revisar, intervaloSeg * 1000);
 }
 
-// ----------------------------
-// Inicialización
-// ----------------------------
 document.addEventListener("DOMContentLoaded", () => {
-  try {
-    iniciarRecordatorios({ intervaloSeg: 10 });
-  } catch (err) {
-    console.error("Error en recordatorios:", err);
-  }
+  try { iniciarRecordatorios({ intervaloSeg: 10 }); } catch {}
 });
+
+
+// ===============================
+// HU6: Búsqueda de tareas
+// ===============================
+const inputBusqueda = document.getElementById('busqueda-input');
+const btnLimpiar = document.getElementById('limpiar-busqueda');
+const mensajeBusqueda = document.getElementById('mensaje-busqueda');
+
+let timeoutBusqueda;
+inputBusqueda.addEventListener('input', function() {
+    clearTimeout(timeoutBusqueda);
+    timeoutBusqueda = setTimeout(async () => {
+        const texto = this.value.trim();
+        if (texto === '') return window.location.reload();
+        await buscarTareas(texto);
+    }, 300);
+});
+
+btnLimpiar.addEventListener('click', function() {
+    inputBusqueda.value = '';
+    mensajeBusqueda.classList.add('hidden');
+    window.location.reload();
+});
+
+async function buscarTareas(texto) {
+    try {
+        const tareas = await fetchWithErrorHandling(`/tareas/buscar?texto=${encodeURIComponent(texto)}`);
+        if (tareas.length === 0) {
+            mensajeBusqueda.textContent = 'No se encontraron tareas con ese título';
+            mensajeBusqueda.classList.remove('hidden');
+            mostrarTareasEnListado([]);
+        } else {
+            mensajeBusqueda.classList.add('hidden');
+            mostrarTareasEnListado(tareas);
+        }
+    } catch (error) {
+        mostrarMensaje(error.message);
+    }
+}
+
+function mostrarTareasEnListado(tareas) {
+    const seccionListado = document.querySelector('section.bg-white.rounded-lg.shadow-md.p-6:last-of-type');
+    let contenedor = seccionListado.querySelector('.space-y-4');
+
+    if (!contenedor) {
+        contenedor = document.createElement('div');
+        contenedor.className = 'space-y-4';
+        seccionListado.appendChild(contenedor);
+    }
+    
+    if (tareas.length === 0) {
+        contenedor.innerHTML = '<p class="text-center text-gray-500 italic">No hay tareas que coincidan con tu búsqueda.</p>';
+        return;
+    }
+
+    contenedor.innerHTML = tareas.map(tarea => `
+        <div class="bg-white shadow-md rounded-lg p-4 border border-gray-200">
+            <h2 class="text-lg font-semibold text-gray-800 mb-2">${tarea.titulo}</h2>
+            <p class="text-gray-600 text-sm mb-3">${tarea.descripcion || ''}</p>
+        </div>
+    `).join('');
+}
