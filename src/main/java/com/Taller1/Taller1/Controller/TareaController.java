@@ -44,6 +44,7 @@ public class TareaController {
         model.addAttribute("tareaEditar", new Tarea());
         model.addAttribute("tareas", tareas);
         model.addAttribute("tareaNueva", new Tarea());
+        model.addAttribute("estado", estado != null ? estado : ""); // 🔹 para mantener filtro
         return "index";
     }
   
