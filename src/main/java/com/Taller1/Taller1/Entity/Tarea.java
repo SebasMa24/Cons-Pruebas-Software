@@ -1,6 +1,7 @@
 package com.Taller1.Taller1.Entity;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -38,6 +39,9 @@ public class Tarea{
     @Column
     private LocalDate fechaFinalizacion;
 
+    @Column
+    private LocalDateTime recordatorio;
+
     // Constructor sin fecha de finalizacion
     public Tarea(Long id, String titulo, String descripcion, LocalDate fechaVencimiento, String estado) {
         this.id = id;
@@ -56,6 +60,7 @@ public class Tarea{
                 ", fechaVencimiento=" + fechaVencimiento +
                 ", estado=" + estado +
                 ", fechaFinalizacion=" + fechaFinalizacion +
+                ", recordatorio=" + recordatorio +
                 '}';
     }
 }

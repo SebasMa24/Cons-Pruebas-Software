@@ -72,6 +72,7 @@ document.querySelectorAll('.edit-btn').forEach(button => {
         document.getElementById('titulo').value = button.getAttribute('data-titulo');
         document.getElementById('descripcion').value = button.getAttribute('data-descripcion');
         document.getElementById('fechaVencimiento').value = button.getAttribute('data-fecha');
+        document.getElementById('recordatorio').value = button.getAttribute('data-recordatorio');
 
         // Mostrar modal
         modal.classList.remove('hidden');
@@ -100,7 +101,8 @@ document.getElementById("form-editar-tarea").addEventListener("submit", async fu
         const data = {
             titulo: datosFormulario.titulo,
             descripcion: datosFormulario.descripcion,
-            fechaVencimiento: datosFormulario.fechaVencimiento
+            fechaVencimiento: datosFormulario.fechaVencimiento,
+            recordatorio: datosFormulario.recordatorio
         };
 
         await fetchWithErrorHandling(`/tarea/${idTarea}`, "PUT", data);
@@ -125,4 +127,84 @@ document.getElementById("form-tarea").addEventListener("submit", async function 
     } catch (error) {
         mostrarMensaje(error.message);
     }
+});
+// script.js - Recordatorios con toast minimalista
+
+// ----------------------------
+// Utilidad: convertir fecha a Date
+// ----------------------------
+function parseFecha(fechaStr) {
+  if (!fechaStr) return null;
+  if (fechaStr instanceof Date) return fechaStr;
+
+  const m = String(fechaStr).match(/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})(?::(\d{2}))?/);
+  if (m) {
+    const [_, y, mo, d, h, mi, s] = m;
+    return new Date(y, mo - 1, d, h, mi, s || 0);
+  }
+
+  const parsed = Date.parse(fechaStr);
+  return isNaN(parsed) ? null : new Date(parsed);
+}
+
+// ----------------------------
+// Toast visual simple
+// ----------------------------
+function mostrarToast(mensaje) {
+  let toast = document.getElementById("recordatorio-toast");
+  if (!toast) {
+    toast = document.createElement("div");
+    toast.id = "recordatorio-toast";
+    toast.className = "fixed bottom-6 right-6 p-4 rounded shadow-lg z-50";
+    toast.style.background = "#fff3cd";
+    toast.style.color = "#856404";
+    toast.style.border = "1px solid #ffeeba";
+    toast.style.transition = "opacity 0.5s ease";
+    toast.style.opacity = "0";
+    document.body.appendChild(toast);
+  }
+  toast.textContent = mensaje;
+  toast.style.opacity = "1";
+  setTimeout(() => { toast.style.opacity = "0"; }, 7000);
+}
+
+// ----------------------------
+// Lógica principal
+// ----------------------------
+function iniciarRecordatorios({ intervaloSeg = 30 } = {}) {
+  const raw = window._TASKS_FROM_SERVER ?? window.recordatorios ?? [];
+  if (!Array.isArray(raw) || raw.length === 0) return;
+
+  const tareas = raw.map(t => ({
+    ...t,
+    _fechaObj: parseFecha(t.recordatorio),
+    _notificado: false
+  }));
+
+  const revisar = () => {
+    const ahora = new Date();
+    tareas.forEach(t => {
+      if (!t._fechaObj || t._notificado) return;
+
+      const diffMs = t._fechaObj.getTime() - ahora.getTime();
+      if (diffMs <= 0 && diffMs > -60000) { // dentro del último minuto
+        mostrarToast(`⏰ Recordatorio: ${t.titulo}${t.descripcion ? " — " + t.descripcion : ""}`);
+        t._notificado = true;
+      }
+    });
+  };
+
+  revisar();
+  setInterval(revisar, intervaloSeg * 1000);
+}
+
+// ----------------------------
+// Inicialización
+// ----------------------------
+document.addEventListener("DOMContentLoaded", () => {
+  try {
+    iniciarRecordatorios({ intervaloSeg: 10 });
+  } catch (err) {
+    console.error("Error en recordatorios:", err);
+  }
 });

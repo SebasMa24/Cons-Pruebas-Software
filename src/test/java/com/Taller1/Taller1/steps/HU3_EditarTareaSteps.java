@@ -1,18 +1,20 @@
 package com.Taller1.Taller1.steps;
 
-import io.cucumber.java.es.Dado;
-import io.cucumber.java.es.Cuando;
-import io.cucumber.java.es.Entonces;
-import io.cucumber.java.Before;
+import java.time.LocalDate;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.Taller1.Taller1.Entity.Tarea;
 import com.Taller1.Taller1.Repository.TareaRepository;
 import com.Taller1.Taller1.Service.TareaService;
 
-import static org.junit.jupiter.api.Assertions.*;
-
-import java.time.LocalDate;
+import io.cucumber.java.Before;
+import io.cucumber.java.es.Cuando;
+import io.cucumber.java.es.Dado;
+import io.cucumber.java.es.Entonces;
 
 public class HU3_EditarTareaSteps {
 
@@ -65,7 +67,8 @@ public class HU3_EditarTareaSteps {
                 tareaActual.getId(),
                 nuevoTitulo,
                 tareaActual.getDescripcion(),
-                tareaActual.getFechaVencimiento()
+                tareaActual.getFechaVencimiento(),
+                tareaActual.getRecordatorio()
         );
     }
 
@@ -90,7 +93,8 @@ public class HU3_EditarTareaSteps {
                 tareaActual.getId(),
                 tareaActual.getTitulo(),
                 tareaActual.getDescripcion(),
-                LocalDate.parse(nuevaFecha)
+                LocalDate.parse(nuevaFecha),
+                tareaActual.getRecordatorio()
         );
     }
 
@@ -111,7 +115,8 @@ public class HU3_EditarTareaSteps {
                 tareaActual.getId(),
                 titulo + " (editada)",
                 tareaActual.getDescripcion(),
-                tareaActual.getFechaVencimiento()
+                tareaActual.getFechaVencimiento(),
+                tareaActual.getRecordatorio()
         );
     }
 

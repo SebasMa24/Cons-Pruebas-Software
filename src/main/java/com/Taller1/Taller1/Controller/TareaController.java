@@ -1,6 +1,7 @@
 package com.Taller1.Taller1.Controller;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -10,8 +11,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.view.RedirectView;
@@ -41,9 +42,18 @@ public class TareaController {
             tareas = tareaService.obtenerTodas();
         }
 
+        // calculos para el view (evitar lógica en Thymeleaf)
+        Map<Long, Boolean> recordatorioProximo = tareaService.calcularRecordatorioProximoMap(tareas);
+        Map<Long, String> recordatorioFormat = tareaService.calcularRecordatorioFormateado(tareas);
+        Map<Long, String> estadoVisual = tareaService.calcularEstadoVisual(tareas);
+
         model.addAttribute("tareaEditar", new Tarea());
         model.addAttribute("tareas", tareas);
         model.addAttribute("tareaNueva", new Tarea());
+
+        model.addAttribute("recordatorioProximo", recordatorioProximo);
+        model.addAttribute("recordatorioFormat", recordatorioFormat);
+        model.addAttribute("estadoVisual", estadoVisual);
         return "index";
     }
   
@@ -62,9 +72,14 @@ public class TareaController {
         LocalDate fechaVencimiento = body.get("fechaVencimiento") != null
                 ? LocalDate.parse((String) body.get("fechaVencimiento"))
                 : null;
-        Tarea tareaEditada = tareaService.editarTarea(id, titulo, descripcion, fechaVencimiento);
+        LocalDateTime recordatorio = body.get("recordatorio") != null
+                ? LocalDateTime.parse((String) body.get("recordatorio"))
+                : null;
+        Tarea tareaEditada = tareaService.editarTarea(id, titulo, descripcion, fechaVencimiento, recordatorio);
+        System.out.println("Tarea editada: " + tareaEditada);
         return ResponseEntity.ok(tareaEditada);
     }
+    
     @PostMapping("/eliminar")
     public Object eliminarTarea(@RequestParam Long id) {
         try {
@@ -83,4 +98,3 @@ public class TareaController {
         return "redirect:/"; // redirige a la lista principal
     }  
 }
-

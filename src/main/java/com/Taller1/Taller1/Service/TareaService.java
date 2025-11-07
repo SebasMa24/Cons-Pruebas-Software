@@ -1,9 +1,13 @@
 package com.Taller1.Taller1.Service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.IsoFields;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -58,7 +62,7 @@ public class TareaService {
 
   
     // Editar una tarea existente (solo título, descripción y fecha de vencimiento)
-    public Tarea editarTarea(Long id, String titulo, String descripcion, LocalDate fechaVencimiento) {
+    public Tarea editarTarea(Long id, String titulo, String descripcion, LocalDate fechaVencimiento, LocalDateTime recordatorio) {
         System.out.println("Editando tarea con ID: " + id);
         Tarea existente = tareaRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Tarea no encontrada"));
@@ -74,6 +78,9 @@ public class TareaService {
         existente.setTitulo(titulo);
         existente.setDescripcion(descripcion);
         existente.setFechaVencimiento(fechaVencimiento);
+        existente.setRecordatorio(recordatorio);
+        System.out.println("Recordatorio recibido: " + recordatorio);
+        System.out.println("Tarea antes de guardar: " + existente);
 
         return tareaRepository.save(existente);
     }
@@ -108,5 +115,52 @@ public class TareaService {
     }
 
     return tareaRepository.save(tarea);
+    }
+
+    // Tareas con recordatorio próximo
+    public List<Tarea> tareasConRecordatorioProximo() {
+        LocalDateTime ahora = LocalDateTime.now();
+        return tareaRepository.findAll().stream()
+                .filter(t -> t.getRecordatorio() != null &&
+                        !t.getRecordatorio().isBefore(ahora) &&
+                        t.getRecordatorio().isBefore(ahora.plusHours(24)))
+                .toList();
+    }
+
+    public Map<Long, Boolean> calcularRecordatorioProximoMap(List<Tarea> tareas) {
+        LocalDateTime ahora = LocalDateTime.now();
+        LocalDateTime dentroDe24h = ahora.plusHours(24);
+        return tareas.stream()
+                .collect(Collectors.toMap(
+                    Tarea::getId,
+                    t -> t.getRecordatorio() != null &&
+                         !t.getRecordatorio().isBefore(ahora) &&
+                         t.getRecordatorio().isBefore(dentroDe24h)
+                ));
+    }
+
+    public Map<Long, String> calcularRecordatorioFormateado(List<Tarea> tareas) {
+        DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+        return tareas.stream()
+                .filter(t -> t.getRecordatorio() != null)
+                .collect(Collectors.toMap(
+                    Tarea::getId,
+                    t -> t.getRecordatorio().format(fmt)
+                ));
+    }
+
+    // utility para determinar si la tarea vence pronto o está vencida
+    public Map<Long, String> calcularEstadoVisual(List<Tarea> tareas) {
+        LocalDateTime ahora = LocalDateTime.now();
+        return tareas.stream().collect(Collectors.toMap(
+            Tarea::getId,
+            t -> {
+                if (t.getFechaVencimiento() == null) return "normal";
+                LocalDateTime venc = t.getFechaVencimiento().atStartOfDay();
+                if (venc.isBefore(ahora)) return "vencida";
+                if (venc.isBefore(ahora.plusDays(1))) return "proxima";
+                return "normal";
+            }
+        ));
     }
 }
