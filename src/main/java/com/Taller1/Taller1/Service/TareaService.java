@@ -109,4 +109,17 @@ public class TareaService {
 
     return tareaRepository.save(tarea);
     }
+
+    /**
+     * HU6: Buscar tareas por título
+     * @param texto Texto a buscar en el título
+     * @return Lista de tareas que contienen el texto en el título
+     */
+    public List<Tarea> buscarPorTitulo(String texto) {
+        if (texto == null || texto.trim().isEmpty()) {
+            // Si el texto está vacío, retornar todas las tareas
+            return tareaRepository.findAll();
+        }
+        return tareaRepository.buscarPorTitulo(texto.trim());
+    }
 }

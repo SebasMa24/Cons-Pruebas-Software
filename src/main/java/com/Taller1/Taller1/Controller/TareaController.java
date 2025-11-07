@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.view.RedirectView;
 
 import com.Taller1.Taller1.Entity.Tarea;
@@ -81,6 +82,12 @@ public class TareaController {
                                 @RequestParam String estado) {
         tareaService.actualizarEstado(id, estado);
         return "redirect:/"; // redirige a la lista principal
-    }  
+    }
+    //Buscar tarea
+    @GetMapping("/tareas/buscar")
+    @ResponseBody
+    public List<Tarea> buscarTareas(@RequestParam(required = false, defaultValue = "") String texto) {
+        return tareaService.buscarPorTitulo(texto);
+    }
 }
 
