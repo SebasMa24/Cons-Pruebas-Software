@@ -60,9 +60,9 @@ public class TareaService {
         }
     }
 
-  
     // Editar una tarea existente (solo título, descripción y fecha de vencimiento)
-    public Tarea editarTarea(Long id, String titulo, String descripcion, LocalDate fechaVencimiento, LocalDateTime recordatorio) {
+    public Tarea editarTarea(Long id, String titulo, String descripcion, LocalDate fechaVencimiento,
+            LocalDateTime recordatorio) {
         System.out.println("Editando tarea con ID: " + id);
         Tarea existente = tareaRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Tarea no encontrada"));
@@ -86,44 +86,46 @@ public class TareaService {
     }
 
     public Tarea crearTarea(Tarea tarea) {
-        if(tarea.getId() != null){
+        if (tarea.getId() != null) {
             if (tareaRepository.existsById(tarea.getId())) {
-                throw new ResponseStatusException(HttpStatus.CONFLICT, "La tarea con ID " + tarea.getId() + " ya existe");
+                throw new ResponseStatusException(HttpStatus.CONFLICT,
+                        "La tarea con ID " + tarea.getId() + " ya existe");
             }
         }
-        
+
         if (tarea.getTitulo() == null || tarea.getTitulo().isEmpty()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El título de la tarea no puede estar vacío");
         }
         if (tarea.getTitulo().length() > 100) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El título de la tarea no puede exceder 100 caracteres");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "El título de la tarea no puede exceder 100 caracteres");
         }
         tarea.setEstado("PENDIENTE");
         return tareaRepository.save(tarea);
     }
+
     // Actualizar estado tarea
     public Tarea actualizarEstado(Long id, String nuevoEstado) {
-    Tarea tarea = tareaRepository.findById(id)
-            .orElseThrow(() -> new IllegalArgumentException("Tarea no encontrada: " + id));
+        Tarea tarea = tareaRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Tarea no encontrada: " + id));
 
-    tarea.setEstado(nuevoEstado);
+        tarea.setEstado(nuevoEstado);
 
-    if ("COMPLETADA".equalsIgnoreCase(nuevoEstado)) {
-        tarea.setFechaFinalizacion(LocalDate.now());
-    } else {
-        tarea.setFechaFinalizacion(null); // si se desmarca
-    }
+        if ("COMPLETADA".equalsIgnoreCase(nuevoEstado)) {
+            tarea.setFechaFinalizacion(LocalDate.now());
+        } else {
+            tarea.setFechaFinalizacion(null); // si se desmarca
+        }
 
-    return tareaRepository.save(tarea);
+        return tareaRepository.save(tarea);
     }
 
     // Tareas con recordatorio próximo
     public List<Tarea> tareasConRecordatorioProximo() {
         LocalDateTime ahora = LocalDateTime.now();
         return tareaRepository.findAll().stream()
-                .filter(t -> t.getRecordatorio() != null &&
-                        !t.getRecordatorio().isBefore(ahora) &&
-                        t.getRecordatorio().isBefore(ahora.plusHours(24)))
+                .filter(t -> t.getRecordatorio() != null)
+                .filter(t -> !t.getRecordatorio().isAfter(ahora))
                 .toList();
     }
 
@@ -132,11 +134,10 @@ public class TareaService {
         LocalDateTime dentroDe24h = ahora.plusHours(24);
         return tareas.stream()
                 .collect(Collectors.toMap(
-                    Tarea::getId,
-                    t -> t.getRecordatorio() != null &&
-                         !t.getRecordatorio().isBefore(ahora) &&
-                         t.getRecordatorio().isBefore(dentroDe24h)
-                ));
+                        Tarea::getId,
+                        t -> t.getRecordatorio() != null &&
+                                !t.getRecordatorio().isBefore(ahora) &&
+                                t.getRecordatorio().isBefore(dentroDe24h)));
     }
 
     public Map<Long, String> calcularRecordatorioFormateado(List<Tarea> tareas) {
@@ -144,23 +145,30 @@ public class TareaService {
         return tareas.stream()
                 .filter(t -> t.getRecordatorio() != null)
                 .collect(Collectors.toMap(
-                    Tarea::getId,
-                    t -> t.getRecordatorio().format(fmt)
-                ));
+                        Tarea::getId,
+                        t -> t.getRecordatorio().format(fmt)));
     }
 
     // utility para determinar si la tarea vence pronto o está vencida
     public Map<Long, String> calcularEstadoVisual(List<Tarea> tareas) {
-        LocalDateTime ahora = LocalDateTime.now();
+        LocalDate hoy = LocalDate.now();
+
         return tareas.stream().collect(Collectors.toMap(
-            Tarea::getId,
-            t -> {
-                if (t.getFechaVencimiento() == null) return "normal";
-                LocalDateTime venc = t.getFechaVencimiento().atStartOfDay();
-                if (venc.isBefore(ahora)) return "vencida";
-                if (venc.isBefore(ahora.plusDays(1))) return "proxima";
-                return "normal";
-            }
-        ));
+                Tarea::getId,
+                t -> {
+                    if (t.getFechaVencimiento() == null) {
+                        return "normal";
+                    }
+
+                    LocalDate fecha = t.getFechaVencimiento();
+
+                    if (fecha.isBefore(hoy)) {
+                        return "vencida";
+                    } else if (fecha.isEqual(hoy)) {
+                        return "proxima";
+                    } else {
+                        return "normal";
+                    }
+                }));
     }
 }

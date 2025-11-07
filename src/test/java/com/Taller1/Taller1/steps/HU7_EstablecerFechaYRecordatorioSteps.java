@@ -27,6 +27,7 @@ public class HU7_EstablecerFechaYRecordatorioSteps {
     private List<Tarea> tareas;
     private boolean alertaGenerada;
     private boolean resaltada;
+    @SuppressWarnings("unused")
     private boolean vencida;
 
     private final DateTimeFormatter inputFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
