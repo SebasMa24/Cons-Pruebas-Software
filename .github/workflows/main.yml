@@ -153,7 +153,7 @@ jobs:
     steps:
       - name: ZAP Baseline Scan
         continue-on-error: true
-        uses: zaproxy/action-baseline@v0.10.0
+        uses: zaproxy/action-baseline@v0.15.0
         with:
           target: "https://actividad5-f5dvbrbrdqfqaxbg.eastus2-01.azurewebsites.net"
           cmd_options: "-a --autooff -I"
@@ -168,3 +168,4 @@ jobs:
             report_html.html 
             report_md.md    
             report_json.json 
+
