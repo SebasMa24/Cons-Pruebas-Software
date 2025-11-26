@@ -15,7 +15,7 @@ permissions:
 
 env:
   JAVA_VERSION: '21'
-  DISTRIBUTION: 'microsoft'
+  DISTRIBUTION: 'temurin'
   SONAR_HOST_URL: 'https://sonarcloud.io'
   SONAR_PROJECT_KEY: 'SebasMa24_Taller1'
   SONAR_ORGANIZATION: 'sebasma24'
@@ -204,6 +204,7 @@ jobs:
           name: zap-security-scan-report
           path: zap-report.html
           retention-days: 30
+
 
 
 
