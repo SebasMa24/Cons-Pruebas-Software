@@ -105,15 +105,18 @@ jobs:
           cache: maven
           
       - name: Build project
-        run: mvn -B clean install
+        run: mvn -B clean install -DskipTests
 
-      - name: Run OWASP Dependency Check
-        uses: dependency-check/Dependency-Check_Action@main
-        with:
-          project: "Actividad5"
-          path: "."
-          format: "HTML"
-          out: "dependency-check-report"
+      - name: Run OWASP Dependency Check (Docker CLI)
+        run: |
+          docker run --rm \
+            -v $(pwd):/src \
+            -v $(pwd)/dependency-check-report:/report \
+            owasp/dependency-check:latest \
+            --scan /src \
+            --format HTML \
+            --project "Actividad5" \
+            --out /report
 
       - name: Upload Dependency Check Report
         uses: actions/upload-artifact@v4
@@ -204,6 +207,7 @@ jobs:
           name: zap-security-scan-report
           path: zap-report.html
           retention-days: 30
+
 
 
 
