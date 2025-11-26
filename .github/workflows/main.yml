@@ -151,14 +151,12 @@ jobs:
       security-events: write
 
     steps:
-      - name: ZAP Baseline Scan without artifact
+      - name: ZAP Baseline Scan
         continue-on-error: true
         uses: zaproxy/action-baseline@v0.10.0
         with:
           target: "https://actividad5-f5dvbrbrdqfqaxbg.eastus2-01.azurewebsites.net"
           cmd_options: "-a --autooff -I"
-          artifact_name: "OWASPreport"
-          token: ${{ secrets.GITHUB_TOKEN }}
           allow_issue_writing: false
           fail_action: false
 
@@ -166,17 +164,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: zap-report
-          path: zap-report.html
-
-
-
-
-
-
-
-
-
-
-
-
-
+          path: |
+            report_html.html 
+            report_md.md    
+            report_json.json 
