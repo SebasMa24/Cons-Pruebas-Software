@@ -15,10 +15,14 @@ public class HU5_FiltrarTareasSteps {
     private List<Map<String, String>> tareasFiltradas = new ArrayList<>();
     private String etiquetaFiltro = "";
 
-  
     @Dado("que el usuario tiene una lista de tareas con diferentes estados:")
     public void cargar_tareas(DataTable dataTable) {
         tareas = dataTable.asMaps(String.class, String.class);
+    }
+
+    @Cuando("el usuario recarga la página")
+    public void elUsuarioRecargaLaPágina() {
+        
     }
 
     @Cuando("el usuario selecciona el filtro {string}")
@@ -44,14 +48,14 @@ public class HU5_FiltrarTareasSteps {
 
     @Cuando("el usuario selecciona un filtro")
     public void elUsuarioSeleccionaUnFiltro() {
-        // Simulación: el usuario selecciona un filtro genérico, por ejemplo "Pendientes"
+        // Simulación: el usuario selecciona un filtro genérico, por ejemplo
+        // "Pendientes"
         filtroActual = "PENDIENTES";
         tareasFiltradas = tareas.stream()
                 .filter(t -> t.get("estado").equals("PENDIENTE"))
                 .collect(java.util.stream.Collectors.toList());
         System.out.println("El usuario ha seleccionado el filtro genérico: " + filtroActual);
     }
-
 
     @Entonces("el sistema debe mostrar solo las tareas con estado {string}")
     public void verificar_tareas_filtradas(String estado) {
@@ -63,7 +67,6 @@ public class HU5_FiltrarTareasSteps {
     public void mostrar_todas_las_tareas() {
         assertEquals(tareas.size(), tareasFiltradas.size());
     }
-
 
     @Entonces("los filtros {string} y {string} deben desactivarse")
     public void losFiltrosYDebenDesactivarse(String filtro1, String filtro2) {
@@ -126,4 +129,3 @@ public class HU5_FiltrarTareasSteps {
     }
 
 }
-
