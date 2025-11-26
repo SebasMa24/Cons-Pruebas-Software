@@ -177,12 +177,13 @@ jobs:
           ZAP_DOCKER_IMAGE: ghcr.io/zaproxy/zap-stable
         with:
           target: "https://actividad5-f5dvbrbrdqfqaxbg.eastus2-01.azurewebsites.net"
-          cmd_options: "-a"
+          cmd_options: "-a --autooff"
 
       - name: Upload ZAP Report
         uses: actions/upload-artifact@v4
         with:
           name: zap-report
           path: zap-report.html
+
 
 
