@@ -1,5 +1,4 @@
-# Taller 1: PR por CLI + Revisión por Pares + Projects + Actions
-
+# Proyecto Final - Construcción Y Pruebas de Software
 ## Autores
 
 - **Luis Sebastián Martínez Guerrero**
@@ -26,7 +25,7 @@ Taller1/
 │  └─ enlaces.md             # Links a Issues, PRs y Project
 ├─ .github/
 │  └─ workflows/
-│     └─ static-analysis.yml # Linter en PR
+│     └─ main.yml # Linter en PR
 ├─ .gitignore
 └─ README.md
 ```
@@ -51,7 +50,9 @@ Cada historia de usuario (HU) contará con:
 | HU-2: Cambiar estado          | Miguel Angel Veloza              |
 | HU-3: Editar             | Yahir Camilo Forero Santos       |
 | HU-4: Eliminar  | Luis Miguel Polo                  |
-
+| HU-5 Filtrar tareas por estado  | Luis Miguel Polo                  |
+| HU-6 Buscar tarea por título  | Yahir Camilo Forero Santos                  |
+| HU-7 Establecer fecha límite y recordatorio  | Miguel Angel Veloza                   |
 ---
 
 ### Cuadro de Rotación
