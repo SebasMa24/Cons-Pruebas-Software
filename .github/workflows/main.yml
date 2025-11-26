@@ -170,6 +170,11 @@ jobs:
     runs-on: ubuntu-latest
     needs: package_and_deploy
 
+    permissions:
+      contents: write
+      actions: write
+      security-events: write
+
     steps:
       - name: ZAP Baseline Scan
         uses: zaproxy/action-baseline@v0.10.0
@@ -184,6 +189,7 @@ jobs:
         with:
           name: zap-report
           path: zap-report.html
+
 
 
 
