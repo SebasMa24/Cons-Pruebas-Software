@@ -110,26 +110,15 @@ jobs:
       - name: Run OWASP Dependency Check
         run: |
           docker run --rm \
-          -v $(pwd):/src \
-          -v $(pwd)/dependency-check-report:/report \
-          owasp/dependency-check:latest \
-          --scan /src \
-          --format HTML \
-          --project "Actividad5" \
-          --out /report \
-          --disableNodeJS \
-          --disablePip \
-          --disableRuby \
-          --disablePHP \
-          --disableCocoapods \
-          --disableNuget \
-          --disableRetireJS \
-          --disableBundleAudit \
-          --disableComposer \
-          --disablePyDist \
-          --disablePyPkg \
-          --disableAssembly \
-          --nvdValidForHours 48
+            -v $(pwd):/src \
+            -v $(pwd)/dependency-check-report:/report \
+            owasp/dependency-check:latest \
+            --scan /src/pom.xml \
+            --scan /src/target \
+            --format HTML \
+            --project "Actividad5" \
+            --out /report \
+            --nvdValidForHours 48
 
       - name: Upload Dependency Check Report
         uses: actions/upload-artifact@v4
@@ -220,6 +209,7 @@ jobs:
           name: zap-security-scan-report
           path: zap-report.html
           retention-days: 30
+
 
 
 
