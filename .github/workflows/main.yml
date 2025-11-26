@@ -176,7 +176,7 @@ jobs:
         env:
           ZAP_DOCKER_IMAGE: ghcr.io/zaproxy/zap-stable
         with:
-          target: "actividad5-f5dvbrbrdqfqaxbg.eastus2-01.azurewebsites.net"
+          target: "https://actividad5-f5dvbrbrdqfqaxbg.eastus2-01.azurewebsites.net"
           cmd_options: "-a"
 
       - name: Upload ZAP Report
@@ -184,4 +184,5 @@ jobs:
         with:
           name: zap-report
           path: zap-report.html
+
 
