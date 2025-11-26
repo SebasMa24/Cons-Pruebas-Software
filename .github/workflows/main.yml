@@ -95,6 +95,16 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Build project (necesario para que DC resuelva dependencias)
+        run: mvn -B clean install
 
       - name: Run OWASP Dependency Check
         uses: dependency-check/Dependency-Check_Action@main
@@ -177,6 +187,7 @@ jobs:
 
     steps:
       - name: ZAP Baseline Scan without artifact
+        continue-on-error: true
         uses: zaproxy/action-baseline@v0.10.0
         with:
           target: "https://actividad5-f5dvbrbrdqfqaxbg.eastus2-01.azurewebsites.net"
@@ -184,7 +195,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           artifact_name: "zap-report" 
           allow_issue_writing: false
-          continue-on-error: true
+          fail_action: false
 
       - name: Upload manually generated report
         uses: actions/upload-artifact@v4
@@ -192,4 +203,5 @@ jobs:
           name: zap-security-scan-report
           path: zap-report.html
           retention-days: 30
+
 
