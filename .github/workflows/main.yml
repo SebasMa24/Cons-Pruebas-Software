@@ -159,13 +159,3 @@ jobs:
           cmd_options: "-a --autooff -I"
           allow_issue_writing: false
           fail_action: false
-
-      - name: Upload generated report
-        uses: actions/upload-artifact@v4
-        with:
-          name: zap-report
-          path: |
-            report_html.html 
-            report_md.md    
-            report_json.json 
-
