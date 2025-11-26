@@ -162,9 +162,6 @@
             	<groupId>org.jacoco</groupId>
             	<artifactId>jacoco-maven-plugin</artifactId>
             	<version>0.8.14</version>
-				<configuration>
-        			<skip>true</skip>  <!-- Agrega esta línea -->
-    			</configuration>
             	<executions>
                		<execution>
                     	<goals>
