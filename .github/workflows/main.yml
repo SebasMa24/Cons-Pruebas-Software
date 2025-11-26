@@ -172,7 +172,9 @@ jobs:
 
     steps:
       - name: ZAP Baseline Scan
-        uses: zaproxy/action-baseline@v0.7.0
+        uses: zaproxy/action-baseline@v0.10.0
+        env:
+          ZAP_DOCKER_IMAGE: ghcr.io/zaproxy/zap-stable
         with:
           target: "actividad5-f5dvbrbrdqfqaxbg.eastus2-01.azurewebsites.net"
           cmd_options: "-a"
@@ -182,3 +184,4 @@ jobs:
         with:
           name: zap-report
           path: zap-report.html
+
