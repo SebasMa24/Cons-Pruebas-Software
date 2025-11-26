@@ -183,13 +183,15 @@ jobs:
         with:
           target: "https://actividad5-f5dvbrbrdqfqaxbg.eastus2-01.azurewebsites.net"
           cmd_options: "-a --autooff -I"
-          github_token: ""
+          token: ${{ secrets.GITHUB_TOKEN }}
+          allow_issue_writing: false
 
       - name: Upload ZAP Report
         uses: actions/upload-artifact@v4
         with:
           name: zap-report
           path: zap-report.html
+
 
 
 
