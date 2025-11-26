@@ -1,7 +1,7 @@
 # Docs: https://github.com/Azure/webapps-deploy
 # More Azure Actions: https://github.com/Azure/actions
 
-name: CI/CD Java + SonarCloud + Azure Web App - Actividad5
+name: CI/CD Completo - SAST + BDD + SCA + Deploy + DAST
 
 on:
   push:
@@ -22,9 +22,12 @@ env:
   AZURE_APP_NAME: 'Actividad5'
   SLOT_NAME: 'Production'
 
+# ======================================================================
+# 1. SAST – ANÁLISIS ESTÁTICO (SonarCloud)
+# ======================================================================
 jobs:
-  build_test_and_sonar:
-    name: Build, Test & SonarCloud
+  sast_sonarcloud:
+    name: SAST - SonarCloud
     runs-on: ubuntu-latest
 
     steps:
@@ -38,29 +41,96 @@ jobs:
         with:
           distribution: ${{ env.DISTRIBUTION }}
           java-version: ${{ env.JAVA_VERSION }}
-          cache: 'maven'
+          cache: maven
 
-      - name: Build, Test & Analyze with SonarCloud
+      - name: Static Analysis with SonarCloud
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
-          mvn -B -ntp clean verify org.jacoco:jacoco-maven-plugin:report \
+          mvn -B -ntp clean verify \
+            org.jacoco:jacoco-maven-plugin:report \
             org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
             -Dsonar.host.url=${{ env.SONAR_HOST_URL }} \
             -Dsonar.organization=${{ env.SONAR_ORGANIZATION }} \
-            -Dsonar.projectKey=${{ env.SONAR_PROJECT_KEY }} \
-            -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml \
-            -Dsonar.coverage.exclusions=**/resources/static/**,**/resources/templates/**
+            -Dsonar.projectKey=${{ env.SONAR_PROJECT_KEY }}
 
-      - name: Upload all test reports (JUnit + Cucumber)
-        if: always()
+# ======================================================================
+# 2. BDD – PRUEBAS CUCUMBER
+# ======================================================================
+  bdd_tests:
+    name: BDD - Cucumber Tests
+    runs-on: ubuntu-latest
+    needs: sast_sonarcloud
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: ${{ env.DISTRIBUTION }}
+          java-version: ${{ env.JAVA_VERSION }}
+          cache: maven
+
+      - name: Run Cucumber Tests
+        run: |
+          mvn -B -ntp verify \
+            -Dcucumber.options="--plugin json:target/cucumber.json --plugin html:target/cucumber-report.html"
+
+      - name: Upload Cucumber Reports
+        if: hashFiles('target/cucumber.json') != ''
         uses: actions/upload-artifact@v4
         with:
-          name: test-reports
-          path: | 
-            target/surefire-reports/
-            target/cucumber-report.html
+          name: cucumber-reports
+          path: |
             target/cucumber.json
+            target/cucumber-report.html
+
+# ======================================================================
+# 3. SCA – ANÁLISIS DE DEPENDENCIAS (OWASP Dependency Check)
+# ======================================================================
+  security_dependencies:
+    name: SCA - OWASP Dependency Check
+    runs-on: ubuntu-latest
+    needs: bdd_tests
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run OWASP Dependency Check
+        uses: dependency-check/Dependency-Check_Action@main
+        with:
+          project: "Actividad5"
+          path: "."
+          format: "HTML"
+          out: "dependency-check-report"
+
+      - name: Upload Dependency Check Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: dependency-check-report
+          path: dependency-check-report/
+
+# ======================================================================
+# 4. BUILD & DEPLOY – EMPAQUETAR Y DESPLEGAR A AZURE
+# ======================================================================
+  package_and_deploy:
+    name: Build & Deploy to Azure
+    runs-on: ubuntu-latest
+    needs: security_dependencies
+
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: ${{ env.DISTRIBUTION }}
+          java-version: ${{ env.JAVA_VERSION }}
 
       - name: Package JAR
         run: mvn -B -DskipTests package
@@ -71,18 +141,7 @@ jobs:
           name: java-app
           path: target/*.jar
 
-  deploy:
-    name: Deploy to Azure Web App
-    runs-on: ubuntu-latest
-    needs: build_test_and_sonar
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-
-    permissions:
-      id-token: write
-      contents: read
-
-    steps:
-      - name: Download artifact from build job
+      - name: Download JAR for Deploy
         uses: actions/download-artifact@v4
         with:
           name: java-app
@@ -99,9 +158,25 @@ jobs:
         with:
           app-name: ${{ env.AZURE_APP_NAME }}
           slot-name: ${{ env.SLOT_NAME }}
-          package: '*.jar'
+          package: "*.jar"
 
+# ======================================================================
+# 5. DAST – ANÁLISIS DINÁMICO (OWASP ZAP)
+# ======================================================================
+  dynamic_analysis:
+    name: DAST - OWASP ZAP
+    runs-on: ubuntu-latest
+    needs: package_and_deploy
 
+    steps:
+      - name: ZAP Baseline Scan
+        uses: zaproxy/action-baseline@v0.7.0
+        with:
+          target: "actividad5-f5dvbrbrdqfqaxbg.eastus2-01.azurewebsites.net"
+          cmd_options: "-a"
 
-
-
+      - name: Upload ZAP Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: zap-report
+          path: zap-report.html
