@@ -176,25 +176,18 @@ jobs:
       security-events: write
 
     steps:
-      - name: ZAP Baseline Scan
+      - name: ZAP Baseline Scan without artifact
         uses: zaproxy/action-baseline@v0.10.0
         with:
           target: "https://actividad5-f5dvbrbrdqfqaxbg.eastus2-01.azurewebsites.net"
-          cmd_options: "-a --autooff -I"
+          cmd_options: "-a --autooff -I -r zap-report.html"
           token: ${{ secrets.GITHUB_TOKEN }}
+          artifact_name: ""  # Forzar nombre vacío
           allow_issue_writing: false
-          artifact_name: "null"
 
-      - name: Upload ZAP Report
+      - name: Upload manually generated report
         uses: actions/upload-artifact@v4
         with:
-          name: zap-report
+          name: zap-security-scan-report
           path: zap-report.html
-
-
-
-
-
-
-
-
+          retention-days: 30
