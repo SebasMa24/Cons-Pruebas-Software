@@ -1,7 +1,7 @@
 # Docs: https://github.com/Azure/webapps-deploy
 # More Azure Actions: https://github.com/Azure/actions
 
-name: CI/CD Completo - SAST + BDD + SCA + Deploy + DAST
+name: CI/CD Completo - SAST + BDD + Deploy + DAST
 
 on:
   push:
@@ -158,16 +158,15 @@ jobs:
           target: "https://actividad5-f5dvbrbrdqfqaxbg.eastus2-01.azurewebsites.net"
           cmd_options: "-a --autooff -I -r zap-report.html"
           token: ${{ secrets.GITHUB_TOKEN }}
-          artifact_name: "zap-report" 
           allow_issue_writing: false
           fail_action: false
 
-      - name: Upload manually generated report
+      - name: Upload generated report
         uses: actions/upload-artifact@v4
         with:
-          name: zap-security-scan-report
+          name: zap-report
           path: zap-report.html
-          retention-days: 30
+
 
 
 
