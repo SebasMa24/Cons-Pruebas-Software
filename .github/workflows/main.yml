@@ -118,7 +118,7 @@ jobs:
             --format HTML \
             --project "Actividad5" \
             --out /report \
-            --nvdValidForHours 48
+            --noupdate
 
       - name: Upload Dependency Check Report
         uses: actions/upload-artifact@v4
@@ -209,6 +209,7 @@ jobs:
           name: zap-security-scan-report
           path: zap-report.html
           retention-days: 30
+
 
 
 
