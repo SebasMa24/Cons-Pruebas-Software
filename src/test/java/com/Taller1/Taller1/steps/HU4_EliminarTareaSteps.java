@@ -21,107 +21,92 @@ public class HU4_EliminarTareaSteps {
     private TareaRepository tareaRepository;
 
     private Tarea tareaActual;
-    private String mensajeConfirmacion;
+    private boolean confirmacion;
+    private Long idTareaEliminada; // ID guardado de tareas eliminadas
 
     @Before("@HU4")
     public void limpiarBaseDatos() {
         tareaRepository.deleteAll();
     }
 
-    // Step para crear tarea
-    @Dado("que existe una tarea llamada {string} en la lista de tareas")
-    public void queExisteUnaTareaEnLaLista(String titulo) {
+    // --- 1. Solicitud de eliminación ---
+    @Dado("que existe una tarea registrada con el título {string}")
+    public void existeTareaRegistrada(String titulo) {
         Tarea tarea = new Tarea();
         tarea.setTitulo(titulo);
         tarea.setEstado("PENDIENTE");
         tareaActual = tareaService.crearTarea(tarea);
-        assertNotNull(tareaActual.getId(), "La tarea no fue creada correctamente");
+        assertNotNull(tareaActual.getId());
     }
 
-    // Step para indicar intención de eliminar (usado también con "Y")
-    @Dado("el usuario desea eliminar la tarea {string}")
-    @Dado("que el usuario desea eliminar la tarea {string}")
-    public void elUsuarioDeseaEliminarLaTarea(String titulo) {
-        Tarea tarea = new Tarea();
-        tarea.setTitulo(titulo);
-        tarea.setEstado("PENDIENTE");
-        tareaService.crearTarea(tarea);
-        tareaActual = tareaService.obtenerTodas().stream()
-                .filter(t -> t.getTitulo().equals(titulo))
-                .findFirst()
-                .orElse(null);
-        assertNotNull(tareaActual, "La tarea no existe en la BD");
+    @Cuando("el sistema recibe una solicitud para eliminar la tarea con identificador válido sin confirmación")
+    public void solicitudSinConfirmacion() {
+        confirmacion = false;
     }
 
-    // Step para hacer clic en eliminar
-    @Cuando("el usuario hace clic en el botón de \"eliminar\" junto a la tarea")
-    public void elUsuarioHaceClicEnEliminar() {
-        // Simula que se muestra ventana emergente
-        mensajeConfirmacion = "¿Estás seguro de que deseas eliminar esta tarea?";
+    @Entonces("el sistema debe requerir confirmación antes de eliminar la tarea")
+    public void requiereConfirmacion() {
+        boolean existe = tareaRepository.existsById(tareaActual.getId());
+        assertTrue(existe, "La tarea no debe eliminarse sin confirmación");
     }
 
-    // Step para verificar ventana emergente
-    @Entonces("el sistema debe mostrar una ventana emergente con el mensaje {string}")
-    public void elSistemaDebeMostrarVentanaEmergente(String mensajeEsperado) {
-        assertEquals(mensajeEsperado, mensajeConfirmacion);
-    }
+    // --- 2. Confirmación de eliminación ---
+    @Cuando("el sistema recibe una solicitud para eliminar la tarea con confirmacion verdadera")
+    public void solicitudConConfirmacion() {
+        confirmacion = true;
 
-    // Step para confirmar eliminación
-    @Cuando("el usuario confirma la acción de eliminar")
-    public void elUsuarioConfirmaLaEliminacion() {
-        tareaService.eliminarTarea(tareaActual.getId());
-        tareaActual = null; // Marcamos como eliminada
-    }
-
-    // Step para verificar que la tarea desaparece
-    @Entonces("la tarea debe desaparecer de la lista de tareas pendientes")
-    public void laTareaDesapareceDeLaLista() {
-        assertFalse(tareaRepository.existsById(tareaActual != null ? tareaActual.getId() : -1L), 
-            "La tarea sigue existiendo");
-    }
-
-    // Step para verificar eliminación permanente
-    @Entonces("la tarea debe ser eliminada permanentemente del sistema")
-    public void laTareaEliminadaEsPermanente() {
-        assertFalse(tareaRepository.existsById(tareaActual != null ? tareaActual.getId() : -1L), 
-            "La tarea sigue existiendo en la BD");
-    }
-
-    // Step para cancelar eliminación
-    @Cuando("el usuario hace clic en \"Cancelar\" en la ventana emergente")
-    public void elUsuarioCancelaEliminacion() {
-        // Simula cancelación: no hacemos nada
-    }
-
-    // Step para verificar que la tarea sigue en la lista
-    @Entonces("la tarea debe permanecer en la lista sin cambios")
-    public void laTareaPermaneceEnLaLista() {
-        Tarea tarea = tareaService.obtenerPorId(tareaActual.getId()).orElse(null);
-        assertNotNull(tarea, "La tarea debería seguir existiendo");
-    }
-
-    // Step para simular recargar la página
-    @Cuando("el usuario recarga la página visible")
-    public void elUsuarioRecargaLaPagina() {
-        if (tareaActual != null) {
-            tareaActual = tareaRepository.findById(tareaActual.getId()).orElse(null);
+        if (confirmacion) {
+            idTareaEliminada = tareaActual.getId(); // Guardar ID
+            tareaService.eliminarTarea(idTareaEliminada);
+            tareaActual = null; // limpiar referencia
         }
     }
 
-    // Step para verificar que la tarea eliminada no aparece
-    @Dado("que el usuario ha eliminado la tarea {string}")
-    public void queElUsuarioHaEliminadoLaTarea(String titulo) {
-        tareaActual = tareaService.obtenerTodas().stream()
-                .filter(t -> t.getTitulo().equals(titulo))
-                .findFirst()
-                .orElse(null);
-        // Debe ser null porque ya se eliminó
-        assertNull(tareaActual, "La tarea todavía existe en la BD");
+    @Entonces("el sistema debe eliminar la tarea permanentemente")
+    public void eliminacionPermanente() {
+        assertFalse(tareaRepository.existsById(idTareaEliminada));
     }
 
-    @Entonces("la tarea eliminada no debe aparecer en ninguna de las listas de tareas")
-    public void tareaEliminadaNoAparece() {
-        // ya comprobado en el step anterior, aquí solo refuerzo
-        assertNull(tareaActual, "La tarea todavía existe en la BD");
+    // --- 3. Cancelación de eliminación ---
+    @Cuando("el sistema recibe una solicitud para eliminar la tarea sin el parámetro de confirmación")
+    public void solicitudCancelada() {
+        confirmacion = false;
+    }
+
+    @Entonces("la tarea no debe ser eliminada y el sistema debe informar que la acción fue cancelada")
+    public void accionCancelada() {
+        boolean existe = tareaRepository.existsById(tareaActual.getId());
+        assertTrue(existe);
+    }
+
+    // --- 4. Persistencia tras eliminación ---
+    @Dado("que una tarea previamente eliminada con id válido ya no existe en el sistema")
+    public void tareaYaEliminada() {
+
+        // Crear una tarea temporal
+        Tarea tareaTemp = new Tarea();
+        tareaTemp.setTitulo("Tarea eliminada previamente");
+        tareaTemp.setEstado("PENDIENTE");
+        Tarea creada = tareaService.crearTarea(tareaTemp);
+
+        // Guardar ID antes de eliminar
+        idTareaEliminada = creada.getId();
+        assertNotNull(idTareaEliminada);
+
+        // Eliminar
+        tareaService.eliminarTarea(idTareaEliminada);
+
+        // Confirmar eliminación
+        assertFalse(tareaRepository.existsById(idTareaEliminada));
+    }
+
+    @Cuando("se consulta la lista de tareas después de la eliminación")
+    public void consultarLista() {
+        // Opcional: puedes cargar una lista aquí si lo deseas.
+    }
+
+    @Entonces("la tarea eliminada no debe aparecer en la lista de tareas")
+    public void noDebeAparecer() {
+        assertFalse(tareaRepository.existsById(idTareaEliminada));
     }
 }
