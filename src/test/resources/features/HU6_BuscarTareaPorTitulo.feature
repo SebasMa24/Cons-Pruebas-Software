@@ -28,3 +28,4 @@ Característica: HU-6 Buscar tarea por título
     Cuando el sistema recibe una solicitud de búsqueda con texto vacío
     Entonces debe devolver todas las tareas disponibles
     Y el sistema debe devolver 4 tarea(s)
+    
