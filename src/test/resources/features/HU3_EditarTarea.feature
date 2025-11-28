@@ -28,4 +28,3 @@ Característica: HU-3 Editar tarea existente
     Dado que una tarea con título "Estudiar Examen" fue editada a "Estudiar Examen Final"
     Cuando se consulta nuevamente la lista de tareas
     Entonces la tarea debe reflejar los datos actualizados
-    
