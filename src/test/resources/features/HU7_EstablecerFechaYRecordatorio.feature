@@ -4,22 +4,23 @@ Característica: Establecer fecha límite y recordatorio
   Quiero poder asignar una fecha límite y un recordatorio a mis tareas
   Para organizar mejor mis tiempos y no olvidar tareas importantes
 
-  Escenario: Mostrar fecha junto al título de la tarea
+  Escenario: Asignar fecha límite a una tarea
     Dado que el usuario crea una tarea llamada "Entregar informe final"
     Cuando establece la fecha límite "2025-11-10"
-    Entonces el sistema debe mostrar la fecha "10/11/2025" junto al título de la tarea
+    Entonces la tarea debe tener la fecha límite "2025-11-10" en la base de datos
 
-  Escenario: Resaltar tareas próximas al vencimiento
-    Dado que existe una tarea llamada "Preparar presentación" con fecha límite en menos de 24 horas
-    Cuando el usuario ingresa nuevamente a la aplicación
-    Entonces la tarea debe mostrarse resaltada con un color o ícono de advertencia
+  Escenario: Asignar recordatorio a una tarea
+    Dado que existe una tarea llamada "Reunión con cliente"
+    Cuando establece un recordatorio para "2025-11-10 14:30"
+    Entonces la tarea debe tener el recordatorio "2025-11-10 14:30" en la base de datos
 
-  Escenario: Generar alerta al llegar la hora del recordatorio
-    Dado que el usuario establece un recordatorio para la tarea "Reunión con cliente" a la hora actual
-    Cuando llega la hora configurada del recordatorio
-    Entonces el sistema debe generar una alerta o notificación visible al usuario
+  Escenario: Validar que la fecha sea anterior al recordatorio
+    Dado que existe una tarea "Preparar presentación"
+    Cuando se intenta establecer la fecha límite después de la fecha del recordatorio
+    Entonces el sistema debe rechazar la solicitud
+    Y debe devolver un error indicando que la fecha límite debe ser anterior o igual al recordatorio
 
-  Escenario: Mostrar tareas vencidas
-    Dado que existe una tarea llamada "Pagar servicios" cuya fecha límite ya ha pasado
-    Cuando el usuario visualiza la lista de tareas
-    Entonces la tarea debe mostrarse con un estilo visual distintivo (por ejemplo, en rojo o con la etiqueta "Vencida")
+  Escenario: Validar tareas con fecha límite vencida
+    Dado que existe una tarea "Pagar servicios" con fecha límite "2025-01-01"
+    Cuando se consulta el estado de las tareas
+    Entonces el sistema debe identificar que la tarea está vencida
