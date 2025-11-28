@@ -63,7 +63,6 @@ public class TareaService {
     // Editar una tarea existente (solo título, descripción y fecha de vencimiento)
     public Tarea editarTarea(Long id, String titulo, String descripcion, LocalDate fechaVencimiento,
             LocalDateTime recordatorio) {
-        System.out.println("Editando tarea con ID: " + id);
         Tarea existente = tareaRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Tarea no encontrada"));
 
@@ -79,18 +78,14 @@ public class TareaService {
         existente.setDescripcion(descripcion);
         existente.setFechaVencimiento(fechaVencimiento);
         existente.setRecordatorio(recordatorio);
-        System.out.println("Recordatorio recibido: " + recordatorio);
-        System.out.println("Tarea antes de guardar: " + existente);
-
         return tareaRepository.save(existente);
     }
 
     public Tarea crearTarea(Tarea tarea) {
-        if (tarea.getId() != null) {
-            if (tareaRepository.existsById(tarea.getId())) {
-                throw new ResponseStatusException(HttpStatus.CONFLICT,
-                        "La tarea con ID " + tarea.getId() + " ya existe");
-            }
+        if (tarea.getId() != null && tareaRepository.existsById(tarea.getId())) {
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "La tarea con ID " + tarea.getId() + " ya existe");
         }
 
         if (tarea.getTitulo() == null || tarea.getTitulo().isEmpty()) {
@@ -174,6 +169,7 @@ public class TareaService {
 
     /**
      * HU6: Buscar tareas por título
+     * 
      * @param texto Texto a buscar en el título
      * @return Lista de tareas que contienen el texto en el título
      */

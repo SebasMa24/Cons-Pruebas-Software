@@ -7,7 +7,6 @@ import io.cucumber.datatable.DataTable;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class HU5_FiltrarTareasSteps {
 
@@ -32,19 +31,19 @@ public class HU5_FiltrarTareasSteps {
             case "PENDIENTES":
                 tareasFiltradas = tareas.stream()
                         .filter(t -> t.get("estado").equals("PENDIENTE"))
-                        .collect(Collectors.toList());
+                        .toList();
                 break;
 
             case "EN PROGRESO":
                 tareasFiltradas = tareas.stream()
                         .filter(t -> t.get("estado").equals("EN_PROGRESO"))
-                        .collect(Collectors.toList());
+                        .toList();
                 break;
 
             case "COMPLETADAS":
                 tareasFiltradas = tareas.stream()
                         .filter(t -> t.get("estado").equals("COMPLETADA"))
-                        .collect(Collectors.toList());
+                        .toList();
                 break;
 
             case "TODOS":
@@ -83,7 +82,7 @@ public class HU5_FiltrarTareasSteps {
         filtroActual = "COMPLETADAS";
         tareasFiltradas = tareas.stream()
                 .filter(t -> t.get("estado").equals("COMPLETADA"))
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Entonces("el filtro debe persistir en la siguiente solicitud")

@@ -61,13 +61,13 @@ public class TareaController {
     }
 
     @PostMapping("/tarea")
-    public ResponseEntity<?> crearTarea(@RequestBody Tarea tareaNueva) {
+    public ResponseEntity<Tarea> crearTarea(@RequestBody Tarea tareaNueva) {
         Tarea creada = tareaService.crearTarea(tareaNueva);
         return ResponseEntity.status(HttpStatus.CREATED).body(creada);
     }
 
     @PutMapping("/tarea/{id}")
-    public ResponseEntity<?> editarTarea(
+    public ResponseEntity<Tarea> editarTarea(
             @PathVariable long id,
             @RequestBody Map<String, Object> body) {
         String titulo = (String) body.get("titulo");
@@ -79,7 +79,6 @@ public class TareaController {
                 ? LocalDateTime.parse((String) body.get("recordatorio"))
                 : null;
         Tarea tareaEditada = tareaService.editarTarea(id, titulo, descripcion, fechaVencimiento, recordatorio);
-        System.out.println("Tarea editada: " + tareaEditada);
         return ResponseEntity.ok(tareaEditada);
     }
 

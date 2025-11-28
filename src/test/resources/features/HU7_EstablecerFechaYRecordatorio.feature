@@ -15,7 +15,7 @@ Característica: Establecer fecha límite y recordatorio
     Entonces la tarea debe tener el recordatorio "2025-11-10 14:30" en la base de datos
 
   Escenario: Validar que la fecha sea anterior al recordatorio
-    Dado que existe una tarea "Preparar presentación"
+    Dado que existe una tarea llamada "Preparar presentación"
     Cuando se intenta establecer la fecha límite después de la fecha del recordatorio
     Entonces el sistema debe rechazar la solicitud
     Y debe devolver un error indicando que la fecha límite debe ser anterior o igual al recordatorio

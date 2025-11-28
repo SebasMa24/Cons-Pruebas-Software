@@ -98,18 +98,6 @@ public class HU7_EstablecerFechaYRecordatorioSteps {
         System.out.println("✅ Recordatorio verificado en BD: " + tarea.getRecordatorio());
     }
 
-    // ======================
-    // ESCENARIO 3: Validar que la fecha sea anterior al recordatorio
-    // ======================
-    @Dado("que existe una tarea {string}")
-    public void que_existe_una_tarea(String titulo) {
-        tarea = new Tarea();
-        tarea.setTitulo(titulo);
-        tarea.setDescripcion("Descripción de prueba");
-        tarea = tareaService.crearTarea(tarea);
-        System.out.println("✅ Tarea creada: " + titulo);
-    }
-
     @Cuando("se intenta establecer la fecha límite después de la fecha del recordatorio")
     public void se_intenta_establecer_la_fecha_limite_despues_de_la_fecha_del_recordatorio() {
         // Primero establecemos un recordatorio próximo
