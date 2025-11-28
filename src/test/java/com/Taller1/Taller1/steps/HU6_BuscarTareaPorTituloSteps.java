@@ -1,4 +1,3 @@
-
 package com.Taller1.Taller1.steps;
 
 import java.util.List;
@@ -78,7 +77,7 @@ public class HU6_BuscarTareaPorTituloSteps {
             "La cantidad de tareas devueltas no coincide con la esperada");
     }
 
-    @Entonces("todas las tareas devueltas deben contener {string} en el título sin distinguir mayúsculas/minúsculas")
+    @Entonces("todas las tareas devueltas deben contener {string} en el título sin distinguir mayúsculas\\/minúsculas")
     public void todasLasTareasDevueltasDebenContenerEnElTitulo(String textoEsperado) {
         assertNotNull(resultadoBusqueda, "El resultado de la búsqueda no debe ser nulo");
         assertFalse(resultadoBusqueda.isEmpty(), "La lista de resultados no debe estar vacía");
