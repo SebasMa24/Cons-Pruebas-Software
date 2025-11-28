@@ -1,29 +1,30 @@
 # language: es
-Característica: Búsqueda de tareas por título
+Característica: HU-6 Buscar tarea por título
   Como usuario
-  Quiero poder buscar una tarea por su título
-  Para encontrar rápidamente una tarea específica entre muchas
+  Quiero buscar tareas por su título
+  Para encontrarlas rápidamente
 
   Antecedentes:
-    Dado que existen las siguientes tareas en el sistema:
+    Dado que existen múltiples tareas registradas en el sistema:
       | titulo                    | descripcion      | estado     |
       | Preparar informe mensual  | Informe Q4       | PENDIENTE  |
       | Enviar correo a cliente   | Follow up        | COMPLETADA |
       | preparar PRESENTACIÓN     | Slides Q4        | PENDIENTE  |
       | Revisar código backend    | Code review PR23 | PENDIENTE  |
 
-  Escenario: Buscar tareas con coincidencias ignorando mayúsculas y minúsculas
-    Cuando el usuario busca tareas con el texto "preparar"
-    Entonces el sistema debe mostrar 2 tarea(s)
-    Y todas las tareas mostradas deben contener "preparar" en el título
+  Escenario: Búsqueda por coincidencia
+    Cuando el sistema recibe una solicitud de búsqueda con el texto "preparar"
+    Entonces debe devolver 2 tarea(s)
+    Y todas las tareas devueltas deben contener "preparar" en el título sin distinguir mayúsculas/minúsculas
 
-  Escenario: Buscar tareas sin coincidencias
-    Cuando el usuario busca tareas con el texto "compras"
-    Entonces el sistema debe mostrar 0 tarea(s)
-    Y se debe mostrar el mensaje "No se encontraron tareas con ese título"
+  Escenario: Sin coincidencias
+    Cuando el sistema recibe una solicitud de búsqueda con el texto "compras"
+    Entonces debe devolver 0 tarea(s)
+    Y el sistema debe informar que no se encontraron tareas
 
-  Escenario: Limpiar búsqueda muestra todas las tareas disponibles
-    Dado que el usuario ha buscado tareas con el texto "correo"
-    Y el resultado de la búsqueda muestra 1 tarea(s)
-    Cuando el usuario limpia el campo de búsqueda
-    Entonces el sistema debe mostrar 4 tarea(s)
+  Escenario: Restablecimiento de resultados
+    Dado que se realizó una búsqueda previamente con el texto "correo"
+    Y la búsqueda devolvió 1 tarea(s)
+    Cuando el sistema recibe una solicitud de búsqueda con texto vacío
+    Entonces debe devolver todas las tareas disponibles
+    Y el sistema debe devolver 4 tarea(s)

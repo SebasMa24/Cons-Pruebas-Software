@@ -1,25 +1,30 @@
 # language: es
 Característica: HU-3 Editar tarea existente
   Como usuario
-  Quiero poder editar tareas existentes
-  Para cambiar los detalles o la fecha límite si es necesario
+  Quiero modificar los datos de una tarea cuando sea necesario
+  Para mantener la información actualizada
 
-  Escenario: Mostrar formulario de edición
-    Dado que existe una tarea llamada "Comprar pan" en la lista
-    Cuando el usuario hace clic en el icono de editar junto a la tarea
-    Entonces debe mostrarse un formulario con los datos actuales de la tarea
+  Escenario: Actualización del contenido
+    Dado que existe una tarea registrada con título "Comprar pan"
+    Cuando el sistema recibe una solicitud de edición con título "Comprar pan integral"
+    Entonces debe actualizar la tarea y confirmar que los cambios fueron aplicados
 
-  Escenario: Actualizar el título de la tarea
-    Dado que el usuario está editando la tarea "Comprar pan"
-    Cuando el usuario cambia el título por "Comprar pan integral" y guarda los cambios
-    Entonces la lista de tareas debe mostrar la tarea con el título "Comprar pan integral"
+  Escenario: Título inválido
+    Dado que existe una tarea registrada con título "Comprar leche"
+    Cuando se intenta editar la tarea con un título vacío
+    Entonces el sistema debe devolver un error indicando que el título no puede estar vacío
 
-  Escenario: Actualizar la fecha de vencimiento
-    Dado que el usuario está editando la tarea "Entregar informe" con fecha de vencimiento "2025-11-10"
-    Cuando el usuario cambia la fecha de vencimiento a "2025-11-15" y guarda los cambios
-    Entonces la lista de tareas debe mostrar la nueva fecha de vencimiento "2025-11-15"
+  Escenario: Título nulo
+    Dado que existe una tarea registrada con título "Hacer ejercicio"
+    Cuando se intenta editar la tarea con un título nulo
+    Entonces el sistema debe devolver un error indicando que el título no puede estar vacío
 
-  Escenario: Persistencia de los cambios
-    Dado que la tarea "Estudiar Examen" fue editada y guardada
-    Cuando el usuario recarga la página actual
-    Entonces la tarea debe reflejar los datos editados correctamente
+  Escenario: Actualización de fecha límite
+    Dado que existe una tarea registrada con título "Entregar informe" y fecha de vencimiento "2025-11-10"
+    Cuando se recibe una solicitud de edición con fecha de vencimiento "2025-11-15"
+    Entonces el sistema debe almacenar esa fecha correctamente
+
+  Escenario: Persistencia de cambios
+    Dado que una tarea con título "Estudiar Examen" fue editada a "Estudiar Examen Final"
+    Cuando se consulta nuevamente la lista de tareas
+    Entonces la tarea debe reflejar los datos actualizados

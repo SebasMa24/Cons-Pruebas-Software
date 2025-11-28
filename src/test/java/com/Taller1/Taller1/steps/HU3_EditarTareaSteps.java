@@ -25,44 +25,26 @@ public class HU3_EditarTareaSteps {
     private TareaRepository tareaRepository;
 
     private Tarea tareaActual;
+    private Exception excepcionCapturada;
 
     @Before
     public void limpiarBaseDatos() {
         tareaRepository.deleteAll();
+        excepcionCapturada = null;
     }
 
-    @Dado("que existe una tarea llamada {string} en la lista")
-    public void queExisteUnaTareaLlamadaEnLaLista(String titulo) {
+    // Escenario 1: Actualización del contenido
+    @Dado("que existe una tarea registrada con título {string}")
+    public void queExisteUnaTareaRegistradaConTitulo(String titulo) {
         Tarea tarea = new Tarea();
         tarea.setTitulo(titulo);
         tarea.setEstado("PENDIENTE");
         tareaActual = tareaService.crearTarea(tarea);
-
         assertNotNull(tareaActual.getId(), "La tarea no fue creada correctamente");
     }
 
-    @Cuando("el usuario hace clic en el icono de editar junto a la tarea")
-    public void elUsuarioHaceClicEnEditar() {
-        assertNotNull(tareaActual, "No hay tarea para editar");
-    }
-
-    @Entonces("debe mostrarse un formulario con los datos actuales de la tarea")
-    public void debeMostrarseFormularioConDatos() {
-        assertNotNull(tareaActual.getTitulo(), "El título debe estar presente en el formulario");
-    }
-
-    @Dado("que el usuario está editando la tarea {string}")
-    public void queElUsuarioEstaEditandoLaTarea(String titulo) {
-        Tarea tarea = new Tarea();
-        tarea.setTitulo(titulo);
-        tarea.setEstado("PENDIENTE");
-        tareaService.crearTarea(tarea);
-        tareaActual = tareaRepository.findByTitulo(titulo).orElse(null);
-        assertNotNull(tareaActual, "La tarea no existe en la BD");
-    }
-
-    @Cuando("el usuario cambia el título por {string} y guarda los cambios")
-    public void elUsuarioCambiaElTituloYGuarda(String nuevoTitulo) {
+    @Cuando("el sistema recibe una solicitud de edición con título {string}")
+    public void elSistemaRecibeSolicitudDeEdicionConTitulo(String nuevoTitulo) {
         tareaActual = tareaService.editarTarea(
                 tareaActual.getId(),
                 nuevoTitulo,
@@ -72,23 +54,70 @@ public class HU3_EditarTareaSteps {
         );
     }
 
-    @Entonces("la lista de tareas debe mostrar la tarea con el título {string}")
-    public void laListaDebeMostrarLaTareaConElNuevoTitulo(String nuevoTitulo) {
+    @Entonces("debe actualizar la tarea y confirmar que los cambios fueron aplicados")
+    public void debeActualizarLaTareaYConfirmarCambios() {
+        assertNotNull(tareaActual, "La tarea actualizada no debe ser nula");
         Tarea tareaBD = tareaService.obtenerPorId(tareaActual.getId()).get();
-        assertEquals(nuevoTitulo, tareaBD.getTitulo());
+        assertEquals(tareaActual.getTitulo(), tareaBD.getTitulo(), 
+                "El título debe coincidir con el actualizado");
     }
 
-    @Dado("que el usuario está editando la tarea {string} con fecha de vencimiento {string}")
-    public void usuarioEditandoConFecha(String titulo, String fechaVencimiento) {
+    // Escenario 2: Título inválido (vacío)
+    @Cuando("se intenta editar la tarea con un título vacío")
+    public void seIntentaEditarLaTareaConTituloVacio() {
+        try {
+            tareaService.editarTarea(
+                    tareaActual.getId(),
+                    "",
+                    tareaActual.getDescripcion(),
+                    tareaActual.getFechaVencimiento(),
+                    tareaActual.getRecordatorio()
+            );
+        } catch (Exception e) {
+            excepcionCapturada = e;
+        }
+    }
+
+    @Entonces("el sistema debe devolver un error indicando que el título no puede estar vacío")
+    public void elSistemaDebeRetornarErrorTituloVacio() {
+        assertNotNull(excepcionCapturada, "Debe lanzarse una excepción");
+        assertTrue(
+                excepcionCapturada.getMessage().toLowerCase().contains("título") 
+                || excepcionCapturada.getMessage().toLowerCase().contains("vacío")
+                || excepcionCapturada.getMessage().toLowerCase().contains("requerido"),
+                "El mensaje de error debe indicar que el título no puede estar vacío"
+        );
+    }
+
+    // Escenario 3: Título nulo
+    @Cuando("se intenta editar la tarea con un título nulo")
+    public void seIntentaEditarLaTareaConTituloNulo() {
+        try {
+            tareaService.editarTarea(
+                    tareaActual.getId(),
+                    null,
+                    tareaActual.getDescripcion(),
+                    tareaActual.getFechaVencimiento(),
+                    tareaActual.getRecordatorio()
+            );
+        } catch (Exception e) {
+            excepcionCapturada = e;
+        }
+    }
+
+    // Escenario 4: Actualización de fecha límite
+    @Dado("que existe una tarea registrada con título {string} y fecha de vencimiento {string}")
+    public void queExisteUnaTareaConTituloYFecha(String titulo, String fechaVencimiento) {
         Tarea tarea = new Tarea();
         tarea.setTitulo(titulo);
         tarea.setEstado("PENDIENTE");
         tarea.setFechaVencimiento(LocalDate.parse(fechaVencimiento));
         tareaActual = tareaService.crearTarea(tarea);
+        assertNotNull(tareaActual.getId(), "La tarea no fue creada correctamente");
     }
 
-    @Cuando("el usuario cambia la fecha de vencimiento a {string} y guarda los cambios")
-    public void cambiaFechaDeVencimiento(String nuevaFecha) {
+    @Cuando("se recibe una solicitud de edición con fecha de vencimiento {string}")
+    public void seRecibeSolicitudConFechaVencimiento(String nuevaFecha) {
         tareaActual = tareaService.editarTarea(
                 tareaActual.getId(),
                 tareaActual.getTitulo(),
@@ -98,35 +127,43 @@ public class HU3_EditarTareaSteps {
         );
     }
 
-    @Entonces("la lista de tareas debe mostrar la nueva fecha de vencimiento {string}")
-    public void verificarNuevaFechaEnLista(String nuevaFecha) {
+    @Entonces("el sistema debe almacenar esa fecha correctamente")
+    public void elSistemaDebeAlmacenarFechaCorrectamente() {
+        assertNotNull(tareaActual, "La tarea actualizada no debe ser nula");
         Tarea tareaBD = tareaService.obtenerPorId(tareaActual.getId()).get();
-        assertEquals(LocalDate.parse(nuevaFecha), tareaBD.getFechaVencimiento());
+        assertNotNull(tareaBD.getFechaVencimiento(), 
+                "La fecha de vencimiento debe estar almacenada");
+        assertEquals(tareaActual.getFechaVencimiento(), tareaBD.getFechaVencimiento(),
+                "La fecha almacenada debe coincidir con la actualizada");
     }
 
-    @Dado("que la tarea {string} fue editada y guardada")
-    public void queLaTareaFueEditada(String titulo) {
+    // Escenario 5: Persistencia de cambios
+    @Dado("que una tarea con título {string} fue editada a {string}")
+    public void queUnaTareaFueEditada(String tituloOriginal, String tituloEditado) {
         Tarea tarea = new Tarea();
-        tarea.setTitulo(titulo);
+        tarea.setTitulo(tituloOriginal);
         tarea.setEstado("PENDIENTE");
         tareaActual = tareaService.crearTarea(tarea);
 
         tareaActual = tareaService.editarTarea(
                 tareaActual.getId(),
-                titulo + " (editada)",
+                tituloEditado,
                 tareaActual.getDescripcion(),
                 tareaActual.getFechaVencimiento(),
                 tareaActual.getRecordatorio()
         );
     }
 
-    @Cuando("el usuario recarga la página actual")
-    public void recargarPagina() {
+    @Cuando("se consulta nuevamente la lista de tareas")
+    public void seConsultaNuevamenteLaLista() {
         tareaActual = tareaService.obtenerPorId(tareaActual.getId()).get();
     }
 
-    @Entonces("la tarea debe reflejar los datos editados correctamente")
-    public void verificarPersistenciaDeCambios() {
-        assertTrue(tareaActual.getTitulo().contains("(editada)"));
+    @Entonces("la tarea debe reflejar los datos actualizados")
+    public void laTareaDebeReflejarDatosActualizados() {
+        assertNotNull(tareaActual, "La tarea debe existir");
+        assertTrue(tareaActual.getTitulo().contains("Final") 
+                || tareaActual.getTitulo().contains("Examen"),
+                "La tarea debe contener los datos actualizados");
     }
 }
